@@ -1,0 +1,20 @@
+{
+  "name": "claude-dashboard",
+  "version": "1.0.0",
+  "description": "Real-time dashboard for monitoring Claude Code sessions",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node --watch backend/server.js",
+    "watch": "node backend/watcher.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.16.0",
+    "chokidar": "^3.5.3",
+    "cors": "^2.8.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

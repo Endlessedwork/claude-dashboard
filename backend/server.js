@@ -446,7 +446,19 @@ function setupWatcher() {
 }
 
 // REST API endpoints
-app.get('/api/sessions', (req, res) => {
+
+// Health check endpoint
+app.get('/health', (_req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    connections: clients.size,
+    claudeDir: fs.existsSync(CLAUDE_DIR) ? 'accessible' : 'not found'
+  });
+});
+
+app.get('/api/sessions', (_req, res) => {
   const sessions = getAllSessions();
   res.json(sessions);
 });
@@ -462,7 +474,7 @@ app.get('/api/session/:projectRaw/:sessionId', (req, res) => {
   res.json(details);
 });
 
-app.get('/api/stats', (req, res) => {
+app.get('/api/stats', (_req, res) => {
   const sessions = getAllSessions();
   
   const stats = {
@@ -489,7 +501,7 @@ app.get('/api/stats', (req, res) => {
 });
 
 // Serve frontend
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
 });
 

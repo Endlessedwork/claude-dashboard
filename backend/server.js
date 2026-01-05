@@ -21,6 +21,14 @@ app.use(express.static(path.join(__dirname, '..', 'frontend')));
 // Store connected clients
 const clients = new Set();
 
+// Session cache
+let sessionCache = [];
+let cacheTimestamp = 0;
+const CACHE_TTL = 5000; // 5 seconds
+
+// Pagination config
+const PAGE_SIZE = 10;
+
 // WebSocket connection handling
 wss.on('connection', (ws) => {
   console.log('📡 Client connected');
@@ -75,44 +83,68 @@ function parseJsonlFile(filePath) {
   }
 }
 
-// Get all sessions
-function getAllSessions() {
+// Get all sessions (with caching)
+function getAllSessions(forceRefresh = false) {
+  const now = Date.now();
+
+  // Return cached if valid
+  if (!forceRefresh && sessionCache.length > 0 && (now - cacheTimestamp) < CACHE_TTL) {
+    return sessionCache;
+  }
+
   const sessions = [];
-  
+
   if (!fs.existsSync(CLAUDE_DIR)) {
     console.log('Claude directory not found:', CLAUDE_DIR);
     return sessions;
   }
-  
+
   const projects = fs.readdirSync(CLAUDE_DIR);
-  
+
   for (const project of projects) {
     const projectPath = path.join(CLAUDE_DIR, project);
     if (!fs.statSync(projectPath).isDirectory()) continue;
-    
+
     const files = fs.readdirSync(projectPath);
-    
+
     for (const file of files) {
       if (!file.endsWith('.jsonl')) continue;
-      
+
       const filePath = path.join(projectPath, file);
       const stats = fs.statSync(filePath);
       const entries = parseJsonlFile(filePath);
-      
+
       // Extract session info
       const sessionInfo = extractSessionInfo(entries, project, file);
       sessionInfo.filePath = filePath;
       sessionInfo.lastModified = stats.mtime;
       sessionInfo.fileSize = stats.size;
-      
+
       sessions.push(sessionInfo);
     }
   }
-  
+
   // Sort by last modified
   sessions.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
-  
+
+  // Update cache
+  sessionCache = sessions;
+  cacheTimestamp = now;
+
   return sessions;
+}
+
+// Get paginated sessions
+function getPaginatedSessions(offset = 0, limit = PAGE_SIZE) {
+  const allSessions = getAllSessions();
+  const paginated = allSessions.slice(offset, offset + limit);
+  return {
+    sessions: paginated,
+    total: allSessions.length,
+    offset,
+    limit,
+    hasMore: offset + limit < allSessions.length
+  };
 }
 
 // Extract session info from entries
@@ -370,12 +402,14 @@ function formatEntryContent(entry) {
   return `ℹ️ ${typeLabel}: ${JSON.stringify(entry, null, 2).substring(0, 300)}`;
 }
 
-// Send initial data to new client
+// Send initial data to new client (paginated)
 function sendInitialData(ws) {
-  const sessions = getAllSessions();
+  const result = getPaginatedSessions(0, PAGE_SIZE);
   ws.send(JSON.stringify({
     type: 'init',
-    sessions,
+    sessions: result.sessions,
+    total: result.total,
+    hasMore: result.hasMore,
     claudeDir: CLAUDE_DIR
   }));
 }
@@ -390,8 +424,23 @@ function handleClientMessage(ws, data) {
         data: details
       }));
       break;
-      
+
+    case 'loadMore':
+      const offset = data.offset || 0;
+      const limit = data.limit || PAGE_SIZE;
+      const result = getPaginatedSessions(offset, limit);
+      ws.send(JSON.stringify({
+        type: 'moreSessions',
+        sessions: result.sessions,
+        total: result.total,
+        offset: result.offset,
+        hasMore: result.hasMore
+      }));
+      break;
+
     case 'refresh':
+      // Force refresh cache and send first page
+      getAllSessions(true);
       sendInitialData(ws);
       break;
   }

@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0f0f1a;
+    }
+    
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .glass {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .gradient-text {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .message-user {
+      background: linear-gradient(135deg, #1e3a5f 0%, #1a2744 100%);
+      border-left: 3px solid #3b82f6;
+    }
+    
+    .message-assistant {
+      background: linear-gradient(135deg, #2d1f3d 0%, #1a1a2e 100%);
+      border-left: 3px solid #a855f7;
+    }
+    
+    .message-tool {
+      background: linear-gradient(135deg, #1f2d1f 0%, #1a2e1a 100%);
+      border-left: 3px solid #22c55e;
+    }
+    
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+    
+    .pulse-dot {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="min-h-screen text-gray-100">
+  <div id="app" class="flex h-screen">
+    
+    <!-- Sidebar -->
+    <aside class="w-80 glass border-r border-gray-800 flex flex-col">
+      <!-- Header -->
+      <div class="p-4 border-b border-gray-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
+            <i data-lucide="bot" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h1 class="font-bold text-lg gradient-text">Claude Dashboard</h1>
+            <div class="flex items-center gap-2 text-xs text-gray-400">
+              <span class="pulse-dot w-2 h-2 bg-green-500 rounded-full"></span>
+              <span id="connectionStatus">Connecting...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Stats -->
+      <div class="p-4 border-b border-gray-800">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="glass rounded-lg p-3">
+            <div class="text-2xl font-bold text-purple-400" id="statSessions">0</div>
+            <div class="text-xs text-gray-400">Sessions</div>
+          </div>
+          <div class="glass rounded-lg p-3">
+            <div class="text-2xl font-bold text-blue-400" id="statTokens">0</div>
+            <div class="text-xs text-gray-400">Tokens</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Search -->
+      <div class="p-4 border-b border-gray-800">
+        <div class="relative">
+          <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
+          <input 
+            type="text" 
+            id="searchInput"
+            placeholder="Search sessions..." 
+            class="w-full bg-gray-800/50 rounded-lg pl-10 pr-4 py-2 text-sm border border-gray-700 focus:border-purple-500 focus:outline-none"
+          >
+        </div>
+      </div>
+      
+      <!-- Session List -->
+      <div class="flex-1 overflow-y-auto scrollbar-thin" id="sessionList">
+        <div class="p-4 text-center text-gray-500">
+          <i data-lucide="loader" class="w-6 h-6 animate-spin mx-auto mb-2"></i>
+          Loading sessions...
+        </div>
+      </div>
+      
+      <!-- Footer -->
+      <div class="p-4 border-t border-gray-800">
+        <button 
+          onclick="refreshSessions()"
+          class="w-full glass hover:bg-gray-700/50 rounded-lg py-2 text-sm flex items-center justify-center gap-2 transition"
+        >
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          Refresh
+        </button>
+      </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col">
+      <!-- Toolbar -->
+      <div class="glass border-b border-gray-800 p-4 flex items-center justify-between">
+        <div id="sessionTitle" class="flex items-center gap-3">
+          <i data-lucide="message-square" class="w-5 h-5 text-purple-400"></i>
+          <span class="font-medium">Select a session</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button 
+            onclick="toggleAutoScroll()"
+            id="autoScrollBtn"
+            class="glass px-3 py-1.5 rounded-lg text-sm flex items-center gap-2 hover:bg-gray-700/50 transition"
+          >
+            <i data-lucide="arrow-down-circle" class="w-4 h-4"></i>
+            Auto-scroll
+          </button>
+          <button 
+            onclick="exportSession()"
+            class="glass px-3 py-1.5 rounded-lg text-sm flex items-center gap-2 hover:bg-gray-700/50 transition"
+          >
+            <i data-lucide="download" class="w-4 h-4"></i>
+            Export
+          </button>
+        </div>
+      </div>
+      
+      <!-- Messages -->
+      <div class="flex-1 overflow-y-auto scrollbar-thin p-4" id="messageContainer">
+        <div class="flex items-center justify-center h-full text-gray-500">
+          <div class="text-center">
+            <i data-lucide="inbox" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
+            <p>Select a session to view conversation</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Stats Bar -->
+      <div class="glass border-t border-gray-800 p-3 flex items-center gap-6 text-sm" id="sessionStats">
+        <div class="flex items-center gap-2 text-gray-400">
+          <i data-lucide="message-circle" class="w-4 h-4"></i>
+          <span id="msgCount">0 messages</span>
+        </div>
+        <div class="flex items-center gap-2 text-gray-400">
+          <i data-lucide="coins" class="w-4 h-4"></i>
+          <span id="tokenCount">0 tokens</span>
+        </div>
+        <div class="flex items-center gap-2 text-gray-400">
+          <i data-lucide="wrench" class="w-4 h-4"></i>
+          <span id="toolCount">0 tools</span>
+        </div>
+      </div>
+    </main>
+    
+    <!-- Live Updates Panel -->
+    <aside class="w-72 glass border-l border-gray-800 flex flex-col" id="livePanel">
+      <div class="p-4 border-b border-gray-800">
+        <h2 class="font-semibold flex items-center gap-2">
+          <i data-lucide="activity" class="w-4 h-4 text-green-400"></i>
+          Live Updates
+        </h2>
+      </div>
+      <div class="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-3" id="liveUpdates">
+        <div class="text-center text-gray-500 text-sm">
+          Waiting for activity...
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    // State
+    let ws = null;
+    let sessions = [];
+    let currentSession = null;
+    let autoScroll = true;
+    
+    // WebSocket connection
+    function connect() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${protocol}//${window.location.host}`);
+      
+      ws.onopen = () => {
+        document.getElementById('connectionStatus').textContent = 'Connected';
+        document.querySelector('.pulse-dot').classList.remove('bg-red-500');
+        document.querySelector('.pulse-dot').classList.add('bg-green-500');
+      };
+      
+      ws.onclose = () => {
+        document.getElementById('connectionStatus').textContent = 'Disconnected';
+        document.querySelector('.pulse-dot').classList.remove('bg-green-500');
+        document.querySelector('.pulse-dot').classList.add('bg-red-500');
+        setTimeout(connect, 3000);
+      };
+      
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        handleMessage(data);
+      };
+    }
+    
+    // Handle WebSocket messages
+    function handleMessage(data) {
+      switch (data.type) {
+        case 'init':
+          sessions = data.sessions;
+          renderSessions();
+          updateStats();
+          break;
+          
+        case 'sessionUpdate':
+          updateSession(data.session);
+          addLiveUpdate(data.session, data.latestEntry);
+          break;
+          
+        case 'sessionDetails':
+          renderSessionDetails(data.data);
+          break;
+          
+        case 'refresh':
+          refreshSessions();
+          break;
+      }
+    }
+    
+    // Render session list
+    function renderSessions() {
+      const container = document.getElementById('sessionList');
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      
+      const filtered = sessions.filter(s => 
+        s.summary.toLowerCase().includes(searchTerm) ||
+        s.project.toLowerCase().includes(searchTerm)
+      );
+      
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="p-4 text-center text-gray-500">
+            No sessions found
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = filtered.map(session => `
+        <div 
+          class="p-3 border-b border-gray-800 hover:bg-gray-800/50 cursor-pointer transition fade-in ${currentSession?.id === session.id ? 'bg-purple-500/10' : ''}"
+          onclick="loadSession('${session.projectRaw}', '${session.id}')"
+        >
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex-1 min-w-0">
+              <div class="text-sm font-medium truncate">${escapeHtml(session.summary.substring(0, 60))}</div>
+              <div class="text-xs text-gray-500 mt-1 truncate">${escapeHtml(session.project)}</div>
+            </div>
+            <div class="text-xs text-gray-500 whitespace-nowrap">
+              ${formatTime(session.lastModified)}
+            </div>
+          </div>
+          <div class="flex items-center gap-3 mt-2 text-xs text-gray-500">
+            <span class="flex items-center gap-1">
+              <i data-lucide="message-circle" class="w-3 h-3"></i>
+              ${session.messageCount}
+            </span>
+            <span class="flex items-center gap-1">
+              <i data-lucide="coins" class="w-3 h-3"></i>
+              ${formatNumber(session.totalTokens)}
+            </span>
+            ${session.toolUses.length > 0 ? `
+              <span class="flex items-center gap-1">
+                <i data-lucide="wrench" class="w-3 h-3"></i>
+                ${session.toolUses.length}
+              </span>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+      
+      lucide.createIcons();
+    }
+    
+    // Load session details
+    function loadSession(projectRaw, sessionId) {
+      currentSession = sessions.find(s => s.id === sessionId);
+      
+      ws.send(JSON.stringify({
+        type: 'getSession',
+        projectRaw,
+        sessionId
+      }));
+      
+      renderSessions();
+    }
+    
+    // Render session details
+    function renderSessionDetails(data) {
+      if (!data) {
+        document.getElementById('messageContainer').innerHTML = `
+          <div class="flex items-center justify-center h-full text-gray-500">
+            <div class="text-center">
+              <i data-lucide="alert-circle" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
+              <p>Session not found</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      // Update title
+      document.getElementById('sessionTitle').innerHTML = `
+        <i data-lucide="message-square" class="w-5 h-5 text-purple-400"></i>
+        <span class="font-medium">${escapeHtml(data.project)}</span>
+        <span class="text-gray-500 text-sm mono">${data.sessionId.substring(0, 8)}...</span>
+      `;
+      
+      // Update stats
+      document.getElementById('msgCount').textContent = `${data.stats.messageCount} messages`;
+      document.getElementById('tokenCount').textContent = `${formatNumber(data.stats.totalTokens)} tokens`;
+      document.getElementById('toolCount').textContent = `${data.stats.toolUses.length} tools`;
+      
+      // Render messages
+      const container = document.getElementById('messageContainer');
+      container.innerHTML = data.messages.map(msg => renderMessage(msg)).join('');
+      
+      lucide.createIcons();
+      
+      if (autoScroll) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+    
+    // Render a single message
+    function renderMessage(msg) {
+      let typeClass = '';
+      let icon = '';
+      let label = '';
+      
+      switch (msg.type) {
+        case 'user':
+          typeClass = 'message-user';
+          icon = 'user';
+          label = 'User';
+          break;
+        case 'assistant':
+          typeClass = 'message-assistant';
+          icon = 'bot';
+          label = 'Claude';
+          break;
+        case 'tool_use':
+          typeClass = 'message-tool';
+          icon = 'wrench';
+          label = 'Tool Use';
+          break;
+        case 'tool_result':
+          typeClass = 'message-tool';
+          icon = 'check-circle';
+          label = 'Tool Result';
+          break;
+        default:
+          typeClass = 'glass';
+          icon = 'info';
+          label = msg.type;
+      }
+      
+      return `
+        <div class="${typeClass} rounded-lg p-4 mb-3 fade-in">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="${icon}" class="w-4 h-4"></i>
+            <span class="text-sm font-medium">${label}</span>
+            ${msg.timestamp ? `<span class="text-xs text-gray-500 ml-auto">${formatTime(msg.timestamp)}</span>` : ''}
+          </div>
+          <div class="text-sm whitespace-pre-wrap mono">${escapeHtml(msg.content || '').substring(0, 2000)}</div>
+        </div>
+      `;
+    }
+    
+    // Update session in list
+    function updateSession(session) {
+      const index = sessions.findIndex(s => s.id === session.id);
+      if (index >= 0) {
+        sessions[index] = session;
+      } else {
+        sessions.unshift(session);
+      }
+      
+      sessions.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+      renderSessions();
+      updateStats();
+      
+      // Reload if current session
+      if (currentSession?.id === session.id) {
+        loadSession(session.projectRaw, session.id);
+      }
+    }
+    
+    // Add live update
+    function addLiveUpdate(session, entry) {
+      const container = document.getElementById('liveUpdates');
+      
+      const updateHtml = `
+        <div class="glass rounded-lg p-3 fade-in">
+          <div class="text-xs text-gray-400 mb-1">${formatTime(new Date())}</div>
+          <div class="text-sm truncate">${escapeHtml(session.summary.substring(0, 50))}</div>
+          ${entry ? `
+            <div class="text-xs text-gray-500 mt-1">
+              ${entry.type}: ${entry.type === 'tool_use' ? entry.name : 'message'}
+            </div>
+          ` : ''}
+        </div>
+      `;
+      
+      container.insertAdjacentHTML('afterbegin', updateHtml);
+      
+      // Keep only last 20 updates
+      while (container.children.length > 20) {
+        container.lastChild.remove();
+      }
+      
+      lucide.createIcons();
+    }
+    
+    // Update stats
+    function updateStats() {
+      const totalTokens = sessions.reduce((sum, s) => sum + s.totalTokens, 0);
+      document.getElementById('statSessions').textContent = sessions.length;
+      document.getElementById('statTokens').textContent = formatNumber(totalTokens);
+    }
+    
+    // Refresh sessions
+    function refreshSessions() {
+      ws.send(JSON.stringify({ type: 'refresh' }));
+    }
+    
+    // Toggle auto scroll
+    function toggleAutoScroll() {
+      autoScroll = !autoScroll;
+      const btn = document.getElementById('autoScrollBtn');
+      btn.classList.toggle('text-purple-400', autoScroll);
+    }
+    
+    // Export session
+    function exportSession() {
+      if (!currentSession) return;
+      
+      const data = JSON.stringify(currentSession, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `claude-session-${currentSession.id}.json`;
+      a.click();
+      
+      URL.revokeObjectURL(url);
+    }
+    
+    // Utility functions
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    function formatNumber(num) {
+      if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+      if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+      return num.toString();
+    }
+    
+    function formatTime(date) {
+      const d = new Date(date);
+      const now = new Date();
+      const diff = now - d;
+      
+      if (diff < 60000) return 'Just now';
+      if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+      if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+      
+      return d.toLocaleDateString('th-TH', { 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+    
+    // Search handler
+    document.getElementById('searchInput').addEventListener('input', () => {
+      renderSessions();
+    });
+    
+    // Initialize
+    connect();
+    lucide.createIcons();
+  </script>
+</body>
+</html>

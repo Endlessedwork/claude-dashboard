@@ -8,207 +8,337 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
-    
+
     body {
       font-family: 'Inter', sans-serif;
-      background: #0f0f1a;
+      background: #0a0a0f;
     }
-    
+
     .mono {
       font-family: 'JetBrains Mono', monospace;
     }
-    
+
     .glass {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.03);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
-    
-    .gradient-text {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+
+    .glass-hover:hover {
+      background: rgba(255, 255, 255, 0.06);
     }
-    
-    .message-user {
-      background: linear-gradient(135deg, #1e3a5f 0%, #1a2744 100%);
-      border-left: 3px solid #3b82f6;
+
+    /* Message types */
+    .msg-user {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
+      border-left: 2px solid #3b82f6;
     }
-    
-    .message-assistant {
-      background: linear-gradient(135deg, #2d1f3d 0%, #1a1a2e 100%);
-      border-left: 3px solid #a855f7;
+
+    .msg-assistant {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.08) 0%, rgba(139, 92, 246, 0.03) 100%);
+      border-left: 2px solid #a855f7;
     }
-    
-    .message-tool {
-      background: linear-gradient(135deg, #1f2d1f 0%, #1a2e1a 100%);
-      border-left: 3px solid #22c55e;
+
+    .msg-tool {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(22, 163, 74, 0.03) 100%);
+      border-left: 2px solid #22c55e;
     }
-    
-    .scrollbar-thin::-webkit-scrollbar {
-      width: 6px;
+
+    .msg-thinking {
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(245, 158, 11, 0.03) 100%);
+      border-left: 2px solid #fbbf24;
     }
-    
-    .scrollbar-thin::-webkit-scrollbar-track {
+
+    .msg-system {
+      background: rgba(255, 255, 255, 0.02);
+      border-left: 2px solid #6b7280;
+    }
+
+    /* Scrollbar */
+    .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+    /* Animations */
+    .fade-in { animation: fadeIn 0.2s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .pulse-dot { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    /* Collapsible */
+    .collapsible-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+    .collapsible-content.open { max-height: 2000px; }
+
+    /* Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    /* JSON Syntax Highlighting */
+    .json-key { color: #93c5fd; }
+    .json-string { color: #86efac; }
+    .json-number { color: #fcd34d; }
+    .json-boolean { color: #f9a8d4; }
+    .json-null { color: #9ca3af; }
+    .json-bracket { color: #6b7280; }
+
+    /* JSON Container */
+    .json-viewer {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+      font-size: 11px;
+      line-height: 1.5;
+      overflow: hidden;
+    }
+    .json-preview {
+      padding: 8px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .json-preview:hover { background: rgba(255, 255, 255, 0.03); }
+    .json-full {
+      padding: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      max-height: 400px;
+      overflow: auto;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    /* Prevent overflow */
+    .main-content {
+      min-width: 0;
+      overflow: hidden;
+    }
+    .message-container {
+      min-width: 0;
+    }
+    .message-container > div {
+      min-width: 0;
+      overflow: hidden;
+    }
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      max-width: 100%;
+    }
+    .truncate-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+
+    /* Filter buttons */
+    .filter-btn {
+      color: #6b7280;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover {
+      color: #9ca3af;
       background: rgba(255, 255, 255, 0.05);
     }
-    
-    .scrollbar-thin::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 3px;
+    .filter-btn.active {
+      color: #a855f7;
+      background: rgba(168, 85, 247, 0.1);
+      border: 1px solid rgba(168, 85, 247, 0.3);
     }
-    
-    .pulse-dot {
-      animation: pulse 2s infinite;
+
+    /* Session card */
+    .session-card {
+      transition: all 0.15s;
     }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+    .session-card:hover {
+      background: rgba(255, 255, 255, 0.03);
     }
-    
-    .fade-in {
-      animation: fadeIn 0.3s ease-in;
+    .session-card.active {
+      background: rgba(168, 85, 247, 0.1);
+      border-left: 2px solid #a855f7;
     }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+
+    /* Model colors */
+    .model-opus { color: #f59e0b; }
+    .model-sonnet { color: #a855f7; }
+    .model-haiku { color: #22c55e; }
   </style>
 </head>
 <body class="min-h-screen text-gray-100">
   <div id="app" class="flex h-screen">
-    
+
     <!-- Sidebar -->
-    <aside class="w-80 glass border-r border-gray-800 flex flex-col">
+    <aside class="w-80 glass border-r border-gray-800/50 flex flex-col">
       <!-- Header -->
-      <div class="p-4 border-b border-gray-800">
+      <div class="p-4 border-b border-gray-800/50">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
-            <i data-lucide="bot" class="w-6 h-6"></i>
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
           </div>
-          <div>
-            <h1 class="font-bold text-lg gradient-text">Claude Dashboard</h1>
-            <div class="flex items-center gap-2 text-xs text-gray-400">
-              <span class="pulse-dot w-2 h-2 bg-green-500 rounded-full"></span>
+          <div class="flex-1">
+            <h1 class="font-bold text-white">Claude Dashboard</h1>
+            <div class="flex items-center gap-1.5 text-xs text-gray-500">
+              <span class="pulse-dot w-1.5 h-1.5 bg-green-500 rounded-full"></span>
               <span id="connectionStatus">Connecting...</span>
             </div>
           </div>
         </div>
       </div>
-      
-      <!-- Stats -->
-      <div class="p-4 border-b border-gray-800">
-        <div class="grid grid-cols-2 gap-3">
-          <div class="glass rounded-lg p-3">
-            <div class="text-2xl font-bold text-purple-400" id="statSessions">0</div>
-            <div class="text-xs text-gray-400">Sessions</div>
+
+      <!-- Quick Stats -->
+      <div class="p-3 border-b border-gray-800/50">
+        <div class="grid grid-cols-3 gap-2">
+          <div class="glass rounded-lg p-2 text-center">
+            <div class="text-base font-bold text-purple-400" id="statSessions">0</div>
+            <div class="text-[9px] text-gray-500 uppercase tracking-wider">Sessions</div>
           </div>
-          <div class="glass rounded-lg p-3">
-            <div class="text-2xl font-bold text-blue-400" id="statTokens">0</div>
-            <div class="text-xs text-gray-400">Tokens</div>
+          <div class="glass rounded-lg p-2 text-center">
+            <div class="text-base font-bold text-blue-400" id="statTokens">0</div>
+            <div class="text-[9px] text-gray-500 uppercase tracking-wider">Tokens</div>
+          </div>
+          <div class="glass rounded-lg p-2 text-center">
+            <div class="text-base font-bold text-green-400" id="statCost">$0</div>
+            <div class="text-[9px] text-gray-500 uppercase tracking-wider">Est. Cost</div>
           </div>
         </div>
       </div>
-      
-      <!-- Search -->
-      <div class="p-4 border-b border-gray-800">
+
+      <!-- Search & Filter -->
+      <div class="p-3 border-b border-gray-800/50 space-y-2">
         <div class="relative">
-          <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500"></i>
-          <input 
-            type="text" 
+          <i data-lucide="search" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600"></i>
+          <input
+            type="text"
             id="searchInput"
-            placeholder="Search sessions..." 
-            class="w-full bg-gray-800/50 rounded-lg pl-10 pr-4 py-2 text-sm border border-gray-700 focus:border-purple-500 focus:outline-none"
+            placeholder="Search sessions..."
+            class="w-full bg-black/30 rounded-lg pl-8 pr-3 py-2 text-sm border border-gray-800/50 focus:border-purple-500/50 focus:outline-none placeholder-gray-600"
           >
         </div>
-      </div>
-      
-      <!-- Session List -->
-      <div class="flex-1 overflow-y-auto scrollbar-thin" id="sessionList">
-        <div class="p-4 text-center text-gray-500">
-          <i data-lucide="loader" class="w-6 h-6 animate-spin mx-auto mb-2"></i>
-          Loading sessions...
+        <!-- Filter buttons -->
+        <div class="flex gap-1.5">
+          <button onclick="filterSessions('all')" class="filter-btn active flex-1 text-[10px] py-1.5 rounded-md glass" data-filter="all">
+            All
+          </button>
+          <button onclick="filterSessions('today')" class="filter-btn flex-1 text-[10px] py-1.5 rounded-md glass" data-filter="today">
+            Today
+          </button>
+          <button onclick="filterSessions('week')" class="filter-btn flex-1 text-[10px] py-1.5 rounded-md glass" data-filter="week">
+            Week
+          </button>
         </div>
       </div>
-      
+
+      <!-- Session List Header -->
+      <div class="px-3 py-2 flex items-center justify-between text-[10px] text-gray-500 uppercase tracking-wider">
+        <span>Recent Sessions</span>
+        <span id="sessionCount">0 items</span>
+      </div>
+
+      <!-- Session List -->
+      <div class="flex-1 overflow-y-auto scrollbar-thin" id="sessionList">
+        <div class="p-4 text-center text-gray-600">
+          <i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2"></i>
+          <span class="text-xs">Loading...</span>
+        </div>
+      </div>
+
       <!-- Footer -->
-      <div class="p-4 border-t border-gray-800">
-        <button 
+      <div class="p-3 border-t border-gray-800/50 space-y-2">
+        <button
           onclick="refreshSessions()"
-          class="w-full glass hover:bg-gray-700/50 rounded-lg py-2 text-sm flex items-center justify-center gap-2 transition"
+          class="w-full glass glass-hover rounded-lg py-2 text-xs flex items-center justify-center gap-1.5 transition text-gray-400 hover:text-white"
         >
-          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-          Refresh
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          Refresh Sessions
         </button>
       </div>
     </aside>
-    
+
     <!-- Main Content -->
-    <main class="flex-1 flex flex-col">
+    <main class="flex-1 flex flex-col bg-black/20 main-content min-w-0 overflow-hidden">
       <!-- Toolbar -->
-      <div class="glass border-b border-gray-800 p-4 flex items-center justify-between">
-        <div id="sessionTitle" class="flex items-center gap-3">
-          <i data-lucide="message-square" class="w-5 h-5 text-purple-400"></i>
-          <span class="font-medium">Select a session</span>
+      <div class="border-b border-gray-800/50 p-3 flex items-center justify-between bg-black/30">
+        <div id="sessionTitle" class="flex items-center gap-2">
+          <span class="text-gray-500 text-sm">Select a session</span>
         </div>
-        <div class="flex items-center gap-2">
-          <button 
+        <div id="sessionMeta" class="flex items-center gap-2">
+          <!-- Model badge, thinking level will appear here -->
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button
             onclick="toggleAutoScroll()"
             id="autoScrollBtn"
-            class="glass px-3 py-1.5 rounded-lg text-sm flex items-center gap-2 hover:bg-gray-700/50 transition"
+            class="glass glass-hover px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition text-purple-400"
           >
-            <i data-lucide="arrow-down-circle" class="w-4 h-4"></i>
+            <i data-lucide="arrow-down-circle" class="w-3.5 h-3.5"></i>
             Auto-scroll
           </button>
-          <button 
+          <button
             onclick="exportSession()"
-            class="glass px-3 py-1.5 rounded-lg text-sm flex items-center gap-2 hover:bg-gray-700/50 transition"
+            class="glass glass-hover px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition text-gray-400 hover:text-white"
           >
-            <i data-lucide="download" class="w-4 h-4"></i>
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
             Export
           </button>
         </div>
       </div>
-      
+
+      <!-- Tool Summary Bar -->
+      <div id="toolSummary" class="hidden border-b border-gray-800/50 p-2 px-4 bg-black/20 flex items-center gap-2 flex-wrap">
+        <span class="text-[10px] text-gray-500 uppercase tracking-wide mr-2">Tools used:</span>
+      </div>
+
       <!-- Messages -->
-      <div class="flex-1 overflow-y-auto scrollbar-thin p-4" id="messageContainer">
-        <div class="flex items-center justify-center h-full text-gray-500">
+      <div class="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin p-4 space-y-2 message-container" id="messageContainer">
+        <div class="flex items-center justify-center h-full text-gray-600">
           <div class="text-center">
-            <i data-lucide="inbox" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
-            <p>Select a session to view conversation</p>
+            <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-3 opacity-30"></i>
+            <p class="text-sm">Select a session to view</p>
           </div>
         </div>
       </div>
-      
+
       <!-- Stats Bar -->
-      <div class="glass border-t border-gray-800 p-3 flex items-center gap-6 text-sm" id="sessionStats">
-        <div class="flex items-center gap-2 text-gray-400">
-          <i data-lucide="message-circle" class="w-4 h-4"></i>
+      <div class="border-t border-gray-800/50 p-2.5 px-4 flex items-center gap-4 text-xs bg-black/30">
+        <div class="flex items-center gap-1.5 text-gray-500">
+          <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
           <span id="msgCount">0 messages</span>
         </div>
-        <div class="flex items-center gap-2 text-gray-400">
-          <i data-lucide="coins" class="w-4 h-4"></i>
+        <div class="flex items-center gap-1.5 text-gray-500">
+          <i data-lucide="zap" class="w-3.5 h-3.5"></i>
           <span id="tokenCount">0 tokens</span>
         </div>
-        <div class="flex items-center gap-2 text-gray-400">
-          <i data-lucide="wrench" class="w-4 h-4"></i>
+        <div class="flex items-center gap-1.5 text-gray-500">
+          <i data-lucide="wrench" class="w-3.5 h-3.5"></i>
           <span id="toolCount">0 tools</span>
+        </div>
+        <div class="flex items-center gap-1.5 text-gray-500 ml-auto">
+          <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
+          <span id="modelName">-</span>
         </div>
       </div>
     </main>
-    
-    <!-- Live Updates Panel -->
-    <aside class="w-72 glass border-l border-gray-800 flex flex-col" id="livePanel">
-      <div class="p-4 border-b border-gray-800">
-        <h2 class="font-semibold flex items-center gap-2">
-          <i data-lucide="activity" class="w-4 h-4 text-green-400"></i>
+
+    <!-- Right Panel - Live Updates -->
+    <aside class="w-64 glass border-l border-gray-800/50 flex flex-col">
+      <div class="p-3 border-b border-gray-800/50">
+        <h2 class="text-sm font-medium flex items-center gap-2 text-gray-300">
+          <i data-lucide="activity" class="w-3.5 h-3.5 text-green-500"></i>
           Live Updates
         </h2>
       </div>
-      <div class="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-3" id="liveUpdates">
-        <div class="text-center text-gray-500 text-sm">
+      <div class="flex-1 overflow-y-auto scrollbar-thin p-2 space-y-2" id="liveUpdates">
+        <div class="text-center text-gray-600 text-xs py-8">
           Waiting for activity...
         </div>
       </div>
@@ -220,33 +350,29 @@
     let ws = null;
     let sessions = [];
     let currentSession = null;
+    let currentSessionData = null;
     let autoScroll = true;
-    
-    // WebSocket connection
+    let currentFilter = 'all';
+
+    // WebSocket
     function connect() {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       ws = new WebSocket(`${protocol}//${window.location.host}`);
-      
+
       ws.onopen = () => {
         document.getElementById('connectionStatus').textContent = 'Connected';
-        document.querySelector('.pulse-dot').classList.remove('bg-red-500');
-        document.querySelector('.pulse-dot').classList.add('bg-green-500');
+        document.querySelector('.pulse-dot').className = 'pulse-dot w-1.5 h-1.5 bg-green-500 rounded-full';
       };
-      
+
       ws.onclose = () => {
-        document.getElementById('connectionStatus').textContent = 'Disconnected';
-        document.querySelector('.pulse-dot').classList.remove('bg-green-500');
-        document.querySelector('.pulse-dot').classList.add('bg-red-500');
+        document.getElementById('connectionStatus').textContent = 'Reconnecting...';
+        document.querySelector('.pulse-dot').className = 'pulse-dot w-1.5 h-1.5 bg-red-500 rounded-full';
         setTimeout(connect, 3000);
       };
-      
-      ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        handleMessage(data);
-      };
+
+      ws.onmessage = (e) => handleMessage(JSON.parse(e.data));
     }
-    
-    // Handle WebSocket messages
+
     function handleMessage(data) {
       switch (data.type) {
         case 'init':
@@ -254,288 +380,674 @@
           renderSessions();
           updateStats();
           break;
-          
         case 'sessionUpdate':
           updateSession(data.session);
           addLiveUpdate(data.session, data.latestEntry);
           break;
-          
         case 'sessionDetails':
+          currentSessionData = data.data;
           renderSessionDetails(data.data);
           break;
-          
         case 'refresh':
           refreshSessions();
           break;
       }
     }
-    
+
+    // Filter sessions
+    function filterSessions(filter) {
+      currentFilter = filter;
+      // Update button states
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === filter);
+      });
+      renderSessions();
+    }
+
     // Render session list
     function renderSessions() {
       const container = document.getElementById('sessionList');
       const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-      
-      const filtered = sessions.filter(s => 
-        s.summary.toLowerCase().includes(searchTerm) ||
-        s.project.toLowerCase().includes(searchTerm)
-      );
-      
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekStart = new Date(todayStart.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+      let filtered = sessions.filter(s => {
+        const summary = typeof s.summary === 'string' ? s.summary : '';
+        const project = typeof s.project === 'string' ? s.project : '';
+        const matchesSearch = summary.toLowerCase().includes(searchTerm) || project.toLowerCase().includes(searchTerm);
+
+        if (!matchesSearch) return false;
+
+        // Apply time filter
+        if (currentFilter === 'today') {
+          return new Date(s.lastModified) >= todayStart;
+        } else if (currentFilter === 'week') {
+          return new Date(s.lastModified) >= weekStart;
+        }
+        return true;
+      });
+
+      // Update session count
+      document.getElementById('sessionCount').textContent = `${filtered.length} items`;
+
       if (filtered.length === 0) {
         container.innerHTML = `
-          <div class="p-4 text-center text-gray-500">
-            No sessions found
+          <div class="p-8 text-center text-gray-600">
+            <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+            <div class="text-xs">No sessions found</div>
           </div>
         `;
+        lucide.createIcons();
         return;
       }
-      
-      container.innerHTML = filtered.map(session => `
-        <div 
-          class="p-3 border-b border-gray-800 hover:bg-gray-800/50 cursor-pointer transition fade-in ${currentSession?.id === session.id ? 'bg-purple-500/10' : ''}"
-          onclick="loadSession('${session.projectRaw}', '${session.id}')"
-        >
-          <div class="flex items-start justify-between gap-2">
-            <div class="flex-1 min-w-0">
-              <div class="text-sm font-medium truncate">${escapeHtml(session.summary.substring(0, 60))}</div>
-              <div class="text-xs text-gray-500 mt-1 truncate">${escapeHtml(session.project)}</div>
+
+      container.innerHTML = filtered.map(session => {
+        const summary = typeof session.summary === 'string' ? session.summary : 'No summary';
+        const isActive = currentSession?.id === session.id;
+        const projectName = session.project.split('/').pop() || session.project;
+        const model = session.model || '';
+        const modelShort = model.includes('opus') ? 'Opus' : model.includes('sonnet') ? 'Sonnet' : model.includes('haiku') ? 'Haiku' : '';
+        const modelClass = model.includes('opus') ? 'model-opus' : model.includes('sonnet') ? 'model-sonnet' : 'model-haiku';
+
+        return `
+          <div
+            class="session-card p-3 border-b border-gray-800/20 cursor-pointer ${isActive ? 'active' : ''}"
+            onclick="loadSession('${session.projectRaw}', '${session.id}')"
+          >
+            <!-- Project & Time -->
+            <div class="flex items-center justify-between mb-1.5">
+              <div class="flex items-center gap-1.5 min-w-0 flex-1">
+                <i data-lucide="folder" class="w-3 h-3 text-gray-600 flex-shrink-0"></i>
+                <span class="text-[10px] text-gray-500 truncate">${escapeHtml(projectName)}</span>
+              </div>
+              <span class="text-[10px] text-gray-600 flex-shrink-0">${formatTime(session.lastModified)}</span>
             </div>
-            <div class="text-xs text-gray-500 whitespace-nowrap">
-              ${formatTime(session.lastModified)}
-            </div>
-          </div>
-          <div class="flex items-center gap-3 mt-2 text-xs text-gray-500">
-            <span class="flex items-center gap-1">
-              <i data-lucide="message-circle" class="w-3 h-3"></i>
-              ${session.messageCount}
-            </span>
-            <span class="flex items-center gap-1">
-              <i data-lucide="coins" class="w-3 h-3"></i>
-              ${formatNumber(session.totalTokens)}
-            </span>
-            ${session.toolUses.length > 0 ? `
-              <span class="flex items-center gap-1">
-                <i data-lucide="wrench" class="w-3 h-3"></i>
-                ${session.toolUses.length}
+
+            <!-- Summary -->
+            <div class="text-sm text-gray-200 line-clamp-2 mb-2 leading-snug">${escapeHtml(summary.substring(0, 100))}</div>
+
+            <!-- Stats Row -->
+            <div class="flex items-center gap-3 text-[10px]">
+              ${modelShort ? `<span class="${modelClass} font-medium">${modelShort}</span>` : ''}
+              <span class="text-gray-600 flex items-center gap-1">
+                <i data-lucide="message-circle" class="w-3 h-3"></i>
+                ${session.messageCount}
               </span>
+              <span class="text-gray-600 flex items-center gap-1">
+                <i data-lucide="zap" class="w-3 h-3"></i>
+                ${formatNumber(session.totalTokens)}
+              </span>
+              ${session.toolUses.length > 0 ? `
+                <span class="text-green-500 flex items-center gap-1">
+                  <i data-lucide="wrench" class="w-3 h-3"></i>
+                  ${session.toolUses.length}
+                </span>
+              ` : ''}
+            </div>
+
+            <!-- Tool badges (if any) -->
+            ${session.toolUses.length > 0 ? `
+              <div class="flex flex-wrap gap-1 mt-2">
+                ${session.toolUses.slice(0, 4).map(t => `
+                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-green-500/10 text-green-400">${escapeHtml(t)}</span>
+                `).join('')}
+                ${session.toolUses.length > 4 ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-gray-500/10 text-gray-500">+${session.toolUses.length - 4}</span>` : ''}
+              </div>
             ` : ''}
           </div>
-        </div>
-      `).join('');
-      
+        `;
+      }).join('');
+
       lucide.createIcons();
     }
-    
-    // Load session details
+
     function loadSession(projectRaw, sessionId) {
       currentSession = sessions.find(s => s.id === sessionId);
-      
-      ws.send(JSON.stringify({
-        type: 'getSession',
-        projectRaw,
-        sessionId
-      }));
-      
+      ws.send(JSON.stringify({ type: 'getSession', projectRaw, sessionId }));
       renderSessions();
     }
-    
+
     // Render session details
     function renderSessionDetails(data) {
       if (!data) {
         document.getElementById('messageContainer').innerHTML = `
-          <div class="flex items-center justify-center h-full text-gray-500">
+          <div class="flex items-center justify-center h-full text-gray-600">
             <div class="text-center">
-              <i data-lucide="alert-circle" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
-              <p>Session not found</p>
+              <i data-lucide="alert-circle" class="w-12 h-12 mx-auto mb-3 opacity-30"></i>
+              <p class="text-sm">Session not found</p>
             </div>
           </div>
         `;
         return;
       }
-      
+
       // Update title
+      const projectName = data.project.split('/').pop() || data.project;
       document.getElementById('sessionTitle').innerHTML = `
-        <i data-lucide="message-square" class="w-5 h-5 text-purple-400"></i>
-        <span class="font-medium">${escapeHtml(data.project)}</span>
-        <span class="text-gray-500 text-sm mono">${data.sessionId.substring(0, 8)}...</span>
+        <span class="text-white font-medium">${escapeHtml(projectName)}</span>
+        <span class="text-gray-600 text-xs mono">#${data.sessionId.substring(0, 8)}</span>
       `;
-      
+
+      // Update meta badges
+      const thinkingLevel = getThinkingLevel(data.messages);
+      const model = data.stats.model || 'unknown';
+      const modelShort = model.includes('opus') ? 'Opus' : model.includes('sonnet') ? 'Sonnet' : model.includes('haiku') ? 'Haiku' : model.split('-')[0];
+
+      document.getElementById('sessionMeta').innerHTML = `
+        ${thinkingLevel ? `<span class="badge bg-yellow-500/10 text-yellow-400"><i data-lucide="brain" class="w-3 h-3"></i>${thinkingLevel}</span>` : ''}
+        <span class="badge bg-purple-500/10 text-purple-400"><i data-lucide="cpu" class="w-3 h-3"></i>${modelShort}</span>
+      `;
+
       // Update stats
       document.getElementById('msgCount').textContent = `${data.stats.messageCount} messages`;
       document.getElementById('tokenCount').textContent = `${formatNumber(data.stats.totalTokens)} tokens`;
       document.getElementById('toolCount').textContent = `${data.stats.toolUses.length} tools`;
-      
-      // Render messages
+      document.getElementById('modelName').textContent = modelShort;
+
+      // Tool summary bar
+      const toolBar = document.getElementById('toolSummary');
+      if (data.stats.toolUses.length > 0) {
+        toolBar.classList.remove('hidden');
+        toolBar.innerHTML = `
+          <span class="text-[10px] text-gray-500 uppercase tracking-wide mr-2">Tools:</span>
+          ${data.stats.toolUses.map(t => `<span class="badge bg-green-500/10 text-green-400">${escapeHtml(t)}</span>`).join('')}
+        `;
+      } else {
+        toolBar.classList.add('hidden');
+      }
+
+      // Render messages (grouped and cleaned)
       const container = document.getElementById('messageContainer');
-      container.innerHTML = data.messages.map(msg => renderMessage(msg)).join('');
-      
+      container.innerHTML = renderMessages(data.messages);
+
       lucide.createIcons();
-      
+
       if (autoScroll) {
         container.scrollTop = container.scrollHeight;
       }
     }
-    
-    // Render a single message
-    function renderMessage(msg) {
-      let typeClass = '';
-      let icon = '';
-      let label = '';
-      
-      switch (msg.type) {
-        case 'user':
-          typeClass = 'message-user';
-          icon = 'user';
-          label = 'User';
-          break;
-        case 'assistant':
-          typeClass = 'message-assistant';
-          icon = 'bot';
-          label = 'Claude';
-          break;
-        case 'tool_use':
-          typeClass = 'message-tool';
-          icon = 'wrench';
-          label = 'Tool Use';
-          break;
-        case 'tool_result':
-          typeClass = 'message-tool';
-          icon = 'check-circle';
-          label = 'Tool Result';
-          break;
-        default:
-          typeClass = 'glass';
-          icon = 'info';
-          label = msg.type;
+
+    // Get thinking level from messages
+    function getThinkingLevel(messages) {
+      for (const msg of messages) {
+        if (msg.raw?.thinkingMetadata?.level) {
+          return msg.raw.thinkingMetadata.level;
+        }
       }
-      
-      return `
-        <div class="${typeClass} rounded-lg p-4 mb-3 fade-in">
-          <div class="flex items-center gap-2 mb-2">
-            <i data-lucide="${icon}" class="w-4 h-4"></i>
-            <span class="text-sm font-medium">${label}</span>
-            ${msg.timestamp ? `<span class="text-xs text-gray-500 ml-auto">${formatTime(msg.timestamp)}</span>` : ''}
+      return null;
+    }
+
+    // Render messages with better grouping
+    function renderMessages(messages) {
+      const filtered = messages.filter(m =>
+        ['user', 'assistant', 'tool_use', 'tool_result'].includes(m.type) ||
+        (m.type === 'system' && m.raw?.subtype !== 'stop_hook_summary')
+      );
+
+      return filtered.map(msg => renderMessage(msg)).join('');
+    }
+
+    // Render single message
+    function renderMessage(msg) {
+      const raw = msg.raw || {};
+
+      // Skip empty or system messages
+      if (msg.type === 'system') return '';
+      if (msg.type === 'file-history-snapshot') return '';
+
+      // User message
+      if (msg.type === 'user') {
+        // Check if content is tool_results (from subagent)
+        if (msg.content && typeof msg.content === 'object' && msg.content.type === 'tool_results') {
+          return renderAgentResultBlock(msg.content.results, msg.raw, msg.timestamp);
+        }
+
+        // Regular user message
+        const content = typeof msg.content === 'string' ? msg.content : '';
+        return `
+          <div class="msg-user rounded-lg p-3 fade-in">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
+                <i data-lucide="user" class="w-3.5 h-3.5 text-blue-400"></i>
+              </div>
+              <span class="text-xs font-medium text-blue-400">You</span>
+              ${msg.timestamp ? `<span class="text-[10px] text-gray-600 ml-auto">${formatTime(msg.timestamp)}</span>` : ''}
+            </div>
+            <div class="text-sm text-gray-200 whitespace-pre-wrap pl-8 break-words">${escapeHtml(content)}</div>
           </div>
-          <div class="text-sm whitespace-pre-wrap mono">${escapeHtml(msg.content || '').substring(0, 2000)}</div>
+        `;
+      }
+
+      // Assistant message - parse content blocks
+      if (msg.type === 'assistant') {
+        const content = raw.message?.content || [];
+        let html = '';
+
+        // Check if it's an array of blocks
+        if (Array.isArray(content)) {
+          for (const block of content) {
+            if (block.type === 'thinking' && block.thinking) {
+              html += renderThinkingBlock(block.thinking);
+            } else if (block.type === 'text' && block.text) {
+              html += renderTextBlock(block.text, msg.timestamp);
+            } else if (block.type === 'tool_use') {
+              html += renderToolUseBlock(block);
+            }
+          }
+        } else if (typeof content === 'string') {
+          html = renderTextBlock(content, msg.timestamp);
+        }
+
+        // Fallback to msg.content
+        if (!html && msg.content) {
+          html = renderTextBlock(msg.content, msg.timestamp);
+        }
+
+        return html;
+      }
+
+      // Tool use
+      if (msg.type === 'tool_use') {
+        const toolName = raw.name || raw.tool || 'Tool';
+        const input = raw.input || raw.arguments || {};
+        return renderToolBlock(toolName, input, 'use');
+      }
+
+      // Tool result
+      if (msg.type === 'tool_result') {
+        const result = msg.content || '';
+        return renderToolResultBlock(result);
+      }
+
+      return '';
+    }
+
+    // Render thinking block (collapsible)
+    function renderThinkingBlock(thinking) {
+      const preview = thinking.substring(0, 100).replace(/\n/g, ' ');
+      const id = 'think-' + Math.random().toString(36).substr(2, 9);
+      return `
+        <div class="msg-thinking rounded-lg p-3 fade-in mb-2">
+          <div class="flex items-center gap-2 cursor-pointer" onclick="toggleThinking('${id}')">
+            <div class="w-6 h-6 rounded-full bg-yellow-500/20 flex items-center justify-center">
+              <i data-lucide="brain" class="w-3.5 h-3.5 text-yellow-400"></i>
+            </div>
+            <span class="text-xs font-medium text-yellow-400">Thinking</span>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-yellow-400 ml-auto transition-transform" id="${id}-icon"></i>
+          </div>
+          <div class="text-xs text-gray-500 pl-8 mt-1 truncate">${escapeHtml(preview)}...</div>
+          <div id="${id}" class="collapsible-content">
+            <div class="text-xs text-gray-400 pl-8 mt-2 whitespace-pre-wrap break-words bg-black/20 rounded p-2 max-h-64 overflow-auto">${escapeHtml(thinking)}</div>
+          </div>
         </div>
       `;
     }
-    
-    // Update session in list
+
+    // Render text block
+    function renderTextBlock(text, timestamp) {
+      return `
+        <div class="msg-assistant rounded-lg p-3 fade-in">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-400"></i>
+            </div>
+            <span class="text-xs font-medium text-purple-400">Claude</span>
+            ${timestamp ? `<span class="text-[10px] text-gray-600 ml-auto">${formatTime(timestamp)}</span>` : ''}
+          </div>
+          <div class="text-sm text-gray-200 whitespace-pre-wrap pl-8 break-words">${escapeHtml(text)}</div>
+        </div>
+      `;
+    }
+
+    // Render tool use block (inline in assistant message)
+    function renderToolUseBlock(block) {
+      const toolName = block.name || 'Tool';
+      const input = block.input || {};
+      return renderToolBlock(toolName, input, 'inline');
+    }
+
+    // Render tool block with collapsible JSON
+    function renderToolBlock(toolName, input, style = 'use') {
+      const id = 'json-' + Math.random().toString(36).substr(2, 9);
+      const jsonStr = JSON.stringify(input, null, 2);
+      const preview = getJsonPreview(input);
+      const isLarge = jsonStr.length > 200;
+
+      if (style === 'inline') {
+        return `
+          <div class="msg-tool rounded-lg p-3 fade-in mb-2">
+            <div class="flex items-center gap-2 mb-2">
+              <div class="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
+                <i data-lucide="terminal" class="w-3.5 h-3.5 text-green-400"></i>
+              </div>
+              <span class="badge bg-green-500/20 text-green-400">${escapeHtml(toolName)}</span>
+            </div>
+            <div class="json-viewer mono ml-8">
+              <div class="json-preview" onclick="toggleJson('${id}')">
+                <i data-lucide="code" class="w-3 h-3 text-gray-500"></i>
+                <span class="text-gray-400 flex-1 truncate">${escapeHtml(preview)}</span>
+                ${isLarge ? `<i data-lucide="chevron-down" class="w-3 h-3 text-gray-500 transition-transform" id="${id}-icon"></i>` : ''}
+              </div>
+              ${isLarge ? `<div id="${id}" class="collapsible-content"><div class="json-full">${syntaxHighlight(jsonStr)}</div></div>` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="msg-tool rounded-lg p-3 fade-in">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
+              <i data-lucide="terminal" class="w-3.5 h-3.5 text-green-400"></i>
+            </div>
+            <span class="badge bg-green-500/20 text-green-400">${escapeHtml(toolName)}</span>
+          </div>
+          <div class="json-viewer mono ml-8">
+            <div class="json-preview" onclick="toggleJson('${id}')">
+              <i data-lucide="code" class="w-3 h-3 text-gray-500"></i>
+              <span class="text-gray-400 flex-1 truncate">${escapeHtml(preview)}</span>
+              <i data-lucide="chevron-down" class="w-3 h-3 text-gray-500 transition-transform" id="${id}-icon"></i>
+            </div>
+            <div id="${id}" class="collapsible-content">
+              <div class="json-full">${syntaxHighlight(jsonStr)}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Render tool result block
+    function renderToolResultBlock(result) {
+      const id = 'result-' + Math.random().toString(36).substr(2, 9);
+      const isLarge = result.length > 150;
+      const preview = result.substring(0, 100).replace(/\n/g, ' ');
+
+      // Try to parse as JSON
+      let isJson = false;
+      let jsonContent = '';
+      try {
+        const parsed = JSON.parse(result);
+        isJson = true;
+        jsonContent = syntaxHighlight(JSON.stringify(parsed, null, 2));
+      } catch (e) {
+        jsonContent = escapeHtml(result);
+      }
+
+      return `
+        <div class="msg-tool rounded-lg p-3 fade-in opacity-80">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-6 h-6 rounded-full bg-green-500/10 flex items-center justify-center">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-green-400"></i>
+            </div>
+            <span class="text-xs text-gray-500">Result</span>
+            ${isJson ? '<span class="badge bg-blue-500/10 text-blue-400">JSON</span>' : ''}
+          </div>
+          <div class="json-viewer mono ml-8">
+            <div class="json-preview" onclick="toggleJson('${id}')">
+              <i data-lucide="${isJson ? 'braces' : 'file-text'}" class="w-3 h-3 text-gray-500"></i>
+              <span class="text-gray-500 flex-1 truncate">${escapeHtml(preview)}${isLarge ? '...' : ''}</span>
+              ${isLarge ? `<i data-lucide="chevron-down" class="w-3 h-3 text-gray-500 transition-transform" id="${id}-icon"></i>` : ''}
+            </div>
+            ${isLarge ? `
+              <div id="${id}" class="collapsible-content">
+                <div class="json-full ${isJson ? '' : 'whitespace-pre-wrap'}">${jsonContent}</div>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    // Render agent/subagent result block
+    function renderAgentResultBlock(results, raw, timestamp) {
+      const id = 'agent-' + Math.random().toString(36).substr(2, 9);
+
+      // Get agent info from raw data
+      const agentInfo = raw?.toolUseResult || {};
+      const agentId = agentInfo.agentId || 'unknown';
+      const duration = agentInfo.totalDurationMs ? (agentInfo.totalDurationMs / 1000).toFixed(1) + 's' : '';
+      const tokens = agentInfo.totalTokens ? formatNumber(agentInfo.totalTokens) : '';
+      const toolCount = agentInfo.totalToolUseCount || 0;
+
+      // Combine all results
+      const fullContent = results.map(r => r.content).join('\n\n');
+      const preview = fullContent.substring(0, 150).replace(/\n/g, ' ');
+      const isLarge = fullContent.length > 200;
+
+      return `
+        <div class="rounded-lg fade-in border border-cyan-500/20 bg-gradient-to-r from-cyan-500/5 to-blue-500/5">
+          <!-- Header -->
+          <div class="p-3 border-b border-cyan-500/10">
+            <div class="flex items-center gap-2 flex-wrap">
+              <div class="w-6 h-6 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                <i data-lucide="bot" class="w-3.5 h-3.5 text-cyan-400"></i>
+              </div>
+              <span class="text-xs font-medium text-cyan-400">Agent Result</span>
+              <span class="badge bg-cyan-500/10 text-cyan-300 text-[10px]">#${escapeHtml(agentId.substring(0, 8))}</span>
+              ${duration ? `<span class="badge bg-gray-500/10 text-gray-400 text-[10px]"><i data-lucide="clock" class="w-2.5 h-2.5"></i>${duration}</span>` : ''}
+              ${tokens ? `<span class="badge bg-gray-500/10 text-gray-400 text-[10px]"><i data-lucide="zap" class="w-2.5 h-2.5"></i>${tokens}</span>` : ''}
+              ${toolCount ? `<span class="badge bg-gray-500/10 text-gray-400 text-[10px]"><i data-lucide="wrench" class="w-2.5 h-2.5"></i>${toolCount}</span>` : ''}
+              ${timestamp ? `<span class="text-[10px] text-gray-600 ml-auto">${formatTime(timestamp)}</span>` : ''}
+            </div>
+          </div>
+          <!-- Content -->
+          <div class="p-3">
+            <div class="json-viewer mono">
+              <div class="json-preview" onclick="toggleJson('${id}')">
+                <i data-lucide="file-text" class="w-3 h-3 text-gray-500"></i>
+                <span class="text-gray-400 flex-1 truncate">${escapeHtml(preview)}${isLarge ? '...' : ''}</span>
+                ${isLarge ? `<i data-lucide="chevron-down" class="w-3 h-3 text-gray-500 transition-transform" id="${id}-icon"></i>` : ''}
+              </div>
+              ${isLarge ? `
+                <div id="${id}" class="collapsible-content">
+                  <div class="json-full whitespace-pre-wrap break-words text-gray-300 text-xs leading-relaxed overflow-x-hidden">${renderMarkdownLite(fullContent)}</div>
+                </div>
+              ` : `
+                <div class="mt-2 text-gray-300 text-xs whitespace-pre-wrap break-words leading-relaxed">${renderMarkdownLite(fullContent)}</div>
+              `}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Simple markdown renderer for agent results
+    function renderMarkdownLite(text) {
+      if (typeof text !== 'string') return '';
+      return escapeHtml(text)
+        // Headers
+        .replace(/^### (.+)$/gm, '<div class="text-sm font-semibold text-cyan-300 mt-3 mb-1">$1</div>')
+        .replace(/^## (.+)$/gm, '<div class="text-sm font-semibold text-cyan-200 mt-4 mb-2">$1</div>')
+        .replace(/^# (.+)$/gm, '<div class="text-base font-bold text-cyan-100 mt-4 mb-2">$1</div>')
+        // Bold
+        .replace(/\*\*(.+?)\*\*/g, '<strong class="text-white">$1</strong>')
+        // Code blocks
+        .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="bg-black/40 rounded p-2 my-2 text-[11px] overflow-x-auto">$2</pre>')
+        // Inline code
+        .replace(/`([^`]+)`/g, '<code class="bg-black/30 px-1 rounded text-cyan-300">$1</code>')
+        // Lists
+        .replace(/^- (.+)$/gm, '<div class="pl-3">• $1</div>')
+        .replace(/^\d+\. (.+)$/gm, '<div class="pl-3">$1</div>')
+        // Line breaks
+        .replace(/\n/g, '<br>');
+    }
+
+    // Get JSON preview (first few keys/values)
+    function getJsonPreview(obj) {
+      if (typeof obj !== 'object' || obj === null) return String(obj);
+      const keys = Object.keys(obj);
+      if (keys.length === 0) return '{}';
+
+      const previews = keys.slice(0, 2).map(k => {
+        const v = obj[k];
+        const valPreview = typeof v === 'string' ? `"${v.substring(0, 20)}${v.length > 20 ? '...' : ''}"` :
+                           typeof v === 'object' ? (Array.isArray(v) ? `[${v.length}]` : '{...}') :
+                           String(v);
+        return `${k}: ${valPreview}`;
+      });
+
+      return `{ ${previews.join(', ')}${keys.length > 2 ? ', ...' : ''} }`;
+    }
+
+    // JSON syntax highlighting
+    function syntaxHighlight(json) {
+      if (typeof json !== 'string') json = JSON.stringify(json, null, 2);
+      json = escapeHtml(json);
+
+      return json.replace(
+        /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+        function (match) {
+          let cls = 'json-number';
+          if (/^"/.test(match)) {
+            if (/:$/.test(match)) {
+              cls = 'json-key';
+              match = match.replace(/:$/, '') + '<span class="json-bracket">:</span>';
+            } else {
+              cls = 'json-string';
+            }
+          } else if (/true|false/.test(match)) {
+            cls = 'json-boolean';
+          } else if (/null/.test(match)) {
+            cls = 'json-null';
+          }
+          return `<span class="${cls}">${match}</span>`;
+        }
+      ).replace(/([{}\[\]])/g, '<span class="json-bracket">$1</span>');
+    }
+
+    // Toggle JSON block
+    function toggleJson(id) {
+      const el = document.getElementById(id);
+      const icon = document.getElementById(id + '-icon');
+      if (el) {
+        el.classList.toggle('open');
+        if (icon) icon.style.transform = el.classList.contains('open') ? 'rotate(180deg)' : '';
+      }
+    }
+
+    // Toggle thinking block
+    function toggleThinking(id) {
+      const el = document.getElementById(id);
+      const icon = document.getElementById(id + '-icon');
+      el.classList.toggle('open');
+      icon.style.transform = el.classList.contains('open') ? 'rotate(180deg)' : '';
+    }
+
+    // Update session
     function updateSession(session) {
       const index = sessions.findIndex(s => s.id === session.id);
-      if (index >= 0) {
-        sessions[index] = session;
-      } else {
-        sessions.unshift(session);
-      }
-      
+      if (index >= 0) sessions[index] = session;
+      else sessions.unshift(session);
+
       sessions.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
       renderSessions();
       updateStats();
-      
-      // Reload if current session
+
       if (currentSession?.id === session.id) {
         loadSession(session.projectRaw, session.id);
       }
     }
-    
-    // Add live update
+
+    // Live update
     function addLiveUpdate(session, entry) {
       const container = document.getElementById('liveUpdates');
-      
-      const updateHtml = `
-        <div class="glass rounded-lg p-3 fade-in">
-          <div class="text-xs text-gray-400 mb-1">${formatTime(new Date())}</div>
-          <div class="text-sm truncate">${escapeHtml(session.summary.substring(0, 50))}</div>
-          ${entry ? `
-            <div class="text-xs text-gray-500 mt-1">
-              ${entry.type}: ${entry.type === 'tool_use' ? entry.name : 'message'}
-            </div>
-          ` : ''}
+      const summary = typeof session.summary === 'string' ? session.summary : 'Update';
+
+      let entryType = '';
+      let entryIcon = 'circle';
+      let entryColor = 'gray';
+
+      if (entry) {
+        if (entry.type === 'user') { entryType = 'User'; entryIcon = 'user'; entryColor = 'blue'; }
+        else if (entry.type === 'assistant') { entryType = 'Claude'; entryIcon = 'sparkles'; entryColor = 'purple'; }
+        else if (entry.type === 'tool_use') { entryType = entry.name || 'Tool'; entryIcon = 'terminal'; entryColor = 'green'; }
+        else { entryType = entry.type; }
+      }
+
+      const html = `
+        <div class="glass rounded-lg p-2.5 fade-in">
+          <div class="flex items-center gap-2 mb-1">
+            <i data-lucide="${entryIcon}" class="w-3 h-3 text-${entryColor}-400"></i>
+            <span class="text-xs text-${entryColor}-400">${escapeHtml(entryType)}</span>
+            <span class="text-[10px] text-gray-600 ml-auto">${formatTime(new Date())}</span>
+          </div>
+          <div class="text-xs text-gray-400 truncate">${escapeHtml(summary.substring(0, 40))}</div>
         </div>
       `;
-      
-      container.insertAdjacentHTML('afterbegin', updateHtml);
-      
-      // Keep only last 20 updates
-      while (container.children.length > 20) {
-        container.lastChild.remove();
-      }
-      
+
+      container.insertAdjacentHTML('afterbegin', html);
+      while (container.children.length > 15) container.lastChild.remove();
       lucide.createIcons();
     }
-    
-    // Update stats
+
+    // Stats
     function updateStats() {
-      const totalTokens = sessions.reduce((sum, s) => sum + s.totalTokens, 0);
+      const totalTokens = sessions.reduce((sum, s) => sum + (s.totalTokens || 0), 0);
+      const totalInputTokens = sessions.reduce((sum, s) => sum + (s.totalInputTokens || 0), 0);
+      const totalOutputTokens = sessions.reduce((sum, s) => sum + (s.totalOutputTokens || 0), 0);
+
+      // Estimate cost (approximate rates for Claude)
+      // Opus: $15/MTok input, $75/MTok output
+      // Sonnet: $3/MTok input, $15/MTok output
+      // Using Sonnet rates as default estimate
+      const inputCost = (totalInputTokens / 1000000) * 3;
+      const outputCost = (totalOutputTokens / 1000000) * 15;
+      const totalCost = inputCost + outputCost;
+
       document.getElementById('statSessions').textContent = sessions.length;
       document.getElementById('statTokens').textContent = formatNumber(totalTokens);
+      document.getElementById('statCost').textContent = totalCost < 1 ? `$${totalCost.toFixed(2)}` : `$${totalCost.toFixed(1)}`;
     }
-    
-    // Refresh sessions
+
     function refreshSessions() {
       ws.send(JSON.stringify({ type: 'refresh' }));
     }
-    
-    // Toggle auto scroll
+
     function toggleAutoScroll() {
       autoScroll = !autoScroll;
       const btn = document.getElementById('autoScrollBtn');
       btn.classList.toggle('text-purple-400', autoScroll);
+      btn.classList.toggle('text-gray-500', !autoScroll);
     }
-    
-    // Export session
+
     function exportSession() {
-      if (!currentSession) return;
-      
-      const data = JSON.stringify(currentSession, null, 2);
-      const blob = new Blob([data], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      
+      if (!currentSessionData) return;
+      const blob = new Blob([JSON.stringify(currentSessionData, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
-      a.href = url;
-      a.download = `claude-session-${currentSession.id}.json`;
+      a.href = URL.createObjectURL(blob);
+      a.download = `claude-session-${currentSessionData.sessionId}.json`;
       a.click();
-      
-      URL.revokeObjectURL(url);
     }
-    
-    // Utility functions
+
+    // Utilities
     function escapeHtml(text) {
+      if (typeof text !== 'string') return '';
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
     }
-    
+
     function formatNumber(num) {
+      if (!num) return '0';
       if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
       if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
       return num.toString();
     }
-    
+
     function formatTime(date) {
       const d = new Date(date);
       const now = new Date();
       const diff = now - d;
-      
-      if (diff < 60000) return 'Just now';
-      if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
-      if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
-      
-      return d.toLocaleDateString('th-TH', { 
-        month: 'short', 
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+
+      if (diff < 60000) return 'now';
+      if (diff < 3600000) return Math.floor(diff / 60000) + 'm';
+      if (diff < 86400000) return Math.floor(diff / 3600000) + 'h';
+      return d.toLocaleDateString('en', { month: 'short', day: 'numeric' });
     }
-    
-    // Search handler
-    document.getElementById('searchInput').addEventListener('input', () => {
-      renderSessions();
-    });
-    
-    // Initialize
+
+    // Init
+    document.getElementById('searchInput').addEventListener('input', renderSessions);
     connect();
     lucide.createIcons();
   </script>

@@ -126,41 +126,77 @@ function extractSessionInfo(entries, project, filename) {
   let model = '';
   
   for (const entry of entries) {
-    // Count tokens
-    if (entry.usage) {
-      totalInputTokens += entry.usage.input_tokens || 0;
-      totalOutputTokens += entry.usage.output_tokens || 0;
+    // Count tokens - check both entry.usage and entry.message.usage
+    const usage = entry.usage || entry.message?.usage;
+    if (usage) {
+      totalInputTokens += usage.input_tokens || 0;
+      totalOutputTokens += usage.output_tokens || 0;
+      // Also count cache tokens
+      totalInputTokens += usage.cache_creation_input_tokens || 0;
+      totalInputTokens += usage.cache_read_input_tokens || 0;
     }
-    
+
     // Count messages
     if (entry.type === 'user' || entry.type === 'assistant') {
       messageCount++;
     }
-    
+
     // Get first user message
     if (entry.type === 'user' && !firstUserMessage && entry.message) {
-      const msg = typeof entry.message === 'string' 
-        ? entry.message 
-        : entry.message.content || '';
-      firstUserMessage = msg.substring(0, 200);
+      let msg = '';
+      if (typeof entry.message === 'string') {
+        msg = entry.message;
+      } else if (entry.message.content) {
+        if (typeof entry.message.content === 'string') {
+          msg = entry.message.content;
+        } else if (Array.isArray(entry.message.content)) {
+          msg = entry.message.content
+            .filter(c => c.type === 'text')
+            .map(c => c.text || '')
+            .join(' ');
+        } else {
+          msg = JSON.stringify(entry.message.content);
+        }
+      } else {
+        msg = JSON.stringify(entry.message);
+      }
+      firstUserMessage = String(msg).substring(0, 200);
     }
-    
+
     // Get summary if available
     if (entry.type === 'summary' && entry.summary) {
-      summary = entry.summary;
+      if (typeof entry.summary === 'string') {
+        summary = entry.summary;
+      } else if (entry.summary.content) {
+        summary = typeof entry.summary.content === 'string'
+          ? entry.summary.content
+          : JSON.stringify(entry.summary.content);
+      } else {
+        summary = JSON.stringify(entry.summary);
+      }
     }
-    
-    // Track tool uses
+
+    // Track tool uses - check content array for tool_use blocks
     if (entry.type === 'tool_use' || entry.tool) {
       const toolName = entry.tool || entry.name || 'unknown';
       if (!toolUses.includes(toolName)) {
         toolUses.push(toolName);
       }
     }
-    
-    // Get model
-    if (entry.model && !model) {
-      model = entry.model;
+    // Also check assistant message content for tool_use blocks
+    if (entry.type === 'assistant' && Array.isArray(entry.message?.content)) {
+      for (const block of entry.message.content) {
+        if (block.type === 'tool_use' && block.name) {
+          if (!toolUses.includes(block.name)) {
+            toolUses.push(block.name);
+          }
+        }
+      }
+    }
+
+    // Get model - check both entry.model and entry.message.model
+    if (!model) {
+      model = entry.model || entry.message?.model || '';
     }
   }
   
@@ -214,38 +250,124 @@ function getSessionDetails(projectRaw, sessionId) {
   };
 }
 
+// Extract content from tool_result
+function extractToolResultContent(content) {
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) {
+    return content.map(c => {
+      if (c.type === 'text' && c.text) return c.text;
+      if (typeof c === 'string') return c;
+      return JSON.stringify(c);
+    }).join('\n');
+  }
+  return JSON.stringify(content);
+}
+
 // Format entry content for display
 function formatEntryContent(entry) {
+  // Handle user messages
   if (entry.type === 'user') {
+    // Try entry.message first
     if (typeof entry.message === 'string') return entry.message;
-    if (entry.message?.content) return entry.message.content;
-    return JSON.stringify(entry.message);
+    if (entry.message?.content) {
+      if (typeof entry.message.content === 'string') return entry.message.content;
+      if (Array.isArray(entry.message.content)) {
+        // Check for tool_result in content array
+        const toolResults = entry.message.content.filter(c => c.type === 'tool_result');
+        if (toolResults.length > 0) {
+          // Return structured data for tool results
+          return {
+            type: 'tool_results',
+            results: toolResults.map(tr => ({
+              tool_use_id: tr.tool_use_id,
+              content: extractToolResultContent(tr.content)
+            }))
+          };
+        }
+
+        const texts = entry.message.content
+          .map(c => {
+            if (c.type === 'text' && c.text) return c.text;
+            if (typeof c === 'string') return c;
+            return null;
+          })
+          .filter(Boolean);
+        if (texts.length > 0) return texts.join('\n');
+      }
+    }
+    // Try entry.content directly
+    if (entry.content) {
+      if (typeof entry.content === 'string') return entry.content;
+      if (Array.isArray(entry.content)) {
+        const texts = entry.content
+          .map(c => {
+            if (c.type === 'text' && c.text) return c.text;
+            if (typeof c === 'string') return c;
+            return null;
+          })
+          .filter(Boolean);
+        if (texts.length > 0) return texts.join('\n');
+      }
+    }
+    // Fallback: stringify the whole message
+    if (entry.message) return JSON.stringify(entry.message, null, 2);
+    return JSON.stringify(entry, null, 2);
   }
   
+  // Handle assistant messages
   if (entry.type === 'assistant') {
     if (typeof entry.message === 'string') return entry.message;
     if (entry.message?.content) {
+      if (typeof entry.message.content === 'string') return entry.message.content;
       if (Array.isArray(entry.message.content)) {
-        return entry.message.content
-          .filter(c => c.type === 'text')
-          .map(c => c.text)
-          .join('\n');
+        const parts = [];
+        for (const block of entry.message.content) {
+          if (block.type === 'text' && block.text) {
+            parts.push(block.text);
+          } else if (block.type === 'thinking' && block.thinking) {
+            parts.push(`💭 Thinking:\n${block.thinking.substring(0, 500)}...`);
+          } else if (block.type === 'tool_use') {
+            parts.push(`🔧 Tool: ${block.name}\nInput: ${JSON.stringify(block.input, null, 2).substring(0, 300)}`);
+          }
+        }
+        return parts.join('\n\n') || '[Processing...]';
       }
-      return entry.message.content;
     }
-    return JSON.stringify(entry.message);
+    // Check for direct content field
+    if (entry.content) {
+      if (typeof entry.content === 'string') return entry.content;
+      if (Array.isArray(entry.content)) {
+        const texts = entry.content
+          .filter(c => c.type === 'text')
+          .map(c => c.text || '');
+        return texts.join('\n') || '[Response]';
+      }
+    }
+    return entry.message ? JSON.stringify(entry.message, null, 2) : '[Empty response]';
   }
   
+  // Handle tool use
   if (entry.type === 'tool_use') {
-    return `🔧 Tool: ${entry.name || entry.tool}\nInput: ${JSON.stringify(entry.input || entry.arguments, null, 2)}`;
+    const toolName = entry.name || entry.tool || 'unknown';
+    const input = entry.input || entry.arguments || {};
+    return `🔧 Tool: ${toolName}\nInput: ${JSON.stringify(input, null, 2).substring(0, 500)}`;
   }
   
+  // Handle tool result
   if (entry.type === 'tool_result') {
-    const result = entry.result || entry.output || '';
-    return `📤 Result: ${typeof result === 'string' ? result.substring(0, 500) : JSON.stringify(result).substring(0, 500)}`;
+    const result = entry.result || entry.output || entry.content || '';
+    const resultStr = typeof result === 'string' ? result : JSON.stringify(result);
+    return `📤 Result: ${resultStr.substring(0, 500)}${resultStr.length > 500 ? '...' : ''}`;
   }
-  
-  return JSON.stringify(entry, null, 2);
+
+  // Handle summary
+  if (entry.type === 'summary') {
+    return `📝 Summary: ${entry.summary || ''}`;
+  }
+
+  // Handle other types - show type name and brief content
+  const typeLabel = entry.type || 'unknown';
+  return `ℹ️ ${typeLabel}: ${JSON.stringify(entry, null, 2).substring(0, 300)}`;
 }
 
 // Send initial data to new client

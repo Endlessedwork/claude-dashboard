@@ -32,3 +32,6 @@ Thumbs.db
 
 # Claude data (don't commit user data)
 .claude/
+
+# YoYo AI version control directory
+.yoyo/

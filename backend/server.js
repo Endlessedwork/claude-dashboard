@@ -11,7 +11,7 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 // Config
-const PORT = process.env.PORT || 3456;
+const PORT = process.env.PORT || 59999;
 const CLAUDE_DIR = process.env.CLAUDE_DIR || path.join(process.env.HOME, '.claude', 'projects');
 
 app.use(cors());
@@ -25,6 +25,10 @@ const clients = new Set();
 let sessionCache = [];
 let cacheTimestamp = 0;
 const CACHE_TTL = 5000; // 5 seconds
+
+// Session details cache (for fast loading)
+const sessionDetailsCache = new Map();
+const DETAILS_CACHE_TTL = 30000; // 30 seconds
 
 // Pagination config
 const PAGE_SIZE = 10;
@@ -60,6 +64,24 @@ function broadcast(data) {
       client.send(message);
     }
   });
+}
+
+// Clean XML-like tags from text (command-message, local-command-stdout, etc.)
+function cleanSystemTags(text) {
+  if (!text || typeof text !== 'string') return text;
+  let cleaned = text
+    // Remove all XML-like system tags
+    .replace(/<command-name>[^<]*<\/command-name>/g, '')
+    .replace(/<command-message>[^<]*<\/command-message>/g, '')
+    .replace(/<command-args>[^<]*<\/command-args>/g, '')
+    .replace(/<local-command-stdout>[\s\S]*?<\/local-command-stdout>/g, '')
+    .replace(/<local-command-caveat>[\s\S]*?<\/local-command-caveat>/g, '')
+    // Remove Caveat warnings
+    .replace(/Caveat:[\s\S]*?explicitly asks you to\./g, '')
+    // Clean up whitespace
+    .replace(/\n\s*\n/g, '\n')
+    .trim();
+  return cleaned || 'No summary';
 }
 
 // Parse JSONL file
@@ -156,6 +178,8 @@ function extractSessionInfo(entries, project, filename) {
   let firstUserMessage = '';
   let summary = '';
   let model = '';
+  let isCompleted = false;
+  let lastStopTimestamp = null;
   
   for (const entry of entries) {
     // Count tokens - check both entry.usage and entry.message.usage
@@ -230,20 +254,28 @@ function extractSessionInfo(entries, project, filename) {
     if (!model) {
       model = entry.model || entry.message?.model || '';
     }
+
+    // Check for stop hook (Claude finished responding)
+    if (entry.type === 'system' && entry.subtype === 'stop_hook_summary') {
+      isCompleted = true;
+      lastStopTimestamp = entry.timestamp;
+    }
   }
-  
+
   return {
     id: filename.replace('.jsonl', ''),
     project: decodeProjectName(project),
     projectRaw: project,
-    summary: summary || firstUserMessage || 'No summary',
+    summary: cleanSystemTags(summary || firstUserMessage) || 'No summary',
     messageCount,
     totalInputTokens,
     totalOutputTokens,
     totalTokens: totalInputTokens + totalOutputTokens,
     toolUses,
     model,
-    entryCount: entries.length
+    entryCount: entries.length,
+    isCompleted,
+    lastStopTimestamp
   };
 }
 
@@ -253,32 +285,76 @@ function decodeProjectName(encoded) {
   return encoded.replace(/-/g, '/');
 }
 
-// Get session details
-function getSessionDetails(projectRaw, sessionId) {
+// Message pagination config
+const MESSAGE_PAGE_SIZE = 50; // Load 50 messages at a time
+
+// Get session details with pagination (loads latest messages first)
+function getSessionDetails(projectRaw, sessionId, options = {}) {
+  const { offset = 0, limit = MESSAGE_PAGE_SIZE, loadAll = false } = options;
+
   const filePath = path.join(CLAUDE_DIR, projectRaw, `${sessionId}.jsonl`);
-  
+
   if (!fs.existsSync(filePath)) {
     return null;
   }
-  
+
   const entries = parseJsonlFile(filePath);
-  
-  // Format entries for display
-  const messages = entries.map((entry, index) => {
-    return {
+  const totalMessages = entries.length;
+
+  // If loadAll or small file, return everything
+  if (loadAll || totalMessages <= MESSAGE_PAGE_SIZE) {
+    const messages = entries.map((entry, index) => ({
       index,
       type: entry.type || 'unknown',
       timestamp: entry.timestamp || entry.ts,
       content: formatEntryContent(entry),
       raw: entry
+    }));
+
+    return {
+      sessionId,
+      project: decodeProjectName(projectRaw),
+      messages,
+      stats: extractSessionInfo(entries, projectRaw, `${sessionId}.jsonl`),
+      pagination: {
+        total: totalMessages,
+        offset: 0,
+        limit: totalMessages,
+        hasMore: false
+      }
     };
-  });
-  
+  }
+
+  // Paginate: load from the end (newest messages first)
+  // offset=0 means latest messages, offset=50 means 50 older messages from end
+  const startIndex = Math.max(0, totalMessages - offset - limit);
+  const endIndex = Math.max(0, totalMessages - offset);
+  const paginatedEntries = entries.slice(startIndex, endIndex);
+
+  const messages = paginatedEntries.map((entry, idx) => ({
+    index: startIndex + idx,
+    type: entry.type || 'unknown',
+    timestamp: entry.timestamp || entry.ts,
+    content: formatEntryContent(entry),
+    raw: entry
+  }));
+
+  // Calculate stats from all entries (not just paginated)
+  const stats = extractSessionInfo(entries, projectRaw, `${sessionId}.jsonl`);
+
   return {
     sessionId,
     project: decodeProjectName(projectRaw),
     messages,
-    stats: extractSessionInfo(entries, projectRaw, `${sessionId}.jsonl`)
+    stats,
+    pagination: {
+      total: totalMessages,
+      offset,
+      limit,
+      hasMore: startIndex > 0,
+      loadedFrom: startIndex,
+      loadedTo: endIndex
+    }
   };
 }
 
@@ -418,10 +494,25 @@ function sendInitialData(ws) {
 function handleClientMessage(ws, data) {
   switch (data.type) {
     case 'getSession':
-      const details = getSessionDetails(data.projectRaw, data.sessionId);
+      const details = getSessionDetails(data.projectRaw, data.sessionId, {
+        offset: data.offset || 0,
+        limit: data.limit || MESSAGE_PAGE_SIZE
+      });
       ws.send(JSON.stringify({
         type: 'sessionDetails',
         data: details
+      }));
+      break;
+
+    case 'loadMoreMessages':
+      // Load older messages for current session
+      const moreMessages = getSessionDetails(data.projectRaw, data.sessionId, {
+        offset: data.offset || 0,
+        limit: data.limit || MESSAGE_PAGE_SIZE
+      });
+      ws.send(JSON.stringify({
+        type: 'moreMessages',
+        data: moreMessages
       }));
       break;
 
@@ -462,17 +553,22 @@ function setupWatcher() {
   watcher.on('change', (filePath) => {
     if (filePath.endsWith('.jsonl')) {
       console.log('📝 File changed:', filePath);
-      
+
       // Parse the changed file
       const parts = filePath.split(path.sep);
       const filename = parts.pop();
       const projectRaw = parts.pop();
-      
+      const sessionId = filename.replace('.jsonl', '');
+
+      // Invalidate details cache for this session
+      const cacheKey = `${projectRaw}/${sessionId}`;
+      sessionDetailsCache.delete(cacheKey);
+
       const entries = parseJsonlFile(filePath);
       const sessionInfo = extractSessionInfo(entries, projectRaw, filename);
       sessionInfo.filePath = filePath;
       sessionInfo.lastModified = new Date();
-      
+
       // Broadcast update
       broadcast({
         type: 'sessionUpdate',

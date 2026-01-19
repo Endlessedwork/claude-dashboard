@@ -163,44 +163,84 @@
       margin-bottom: 8px;
     }
 
-    /* Session Cards */
+    /* Session Cards - Ultra Minimal */
     .session-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      transition: all 0.2s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .session-card::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 3px;
       background: transparent;
-      transition: background 0.2s;
+      border: none;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+      position: relative;
+      padding: 8px 12px !important;
     }
 
     .session-card:hover {
       background: rgba(255, 255, 255, 0.04);
-      border-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .session-card:hover::before {
-      background: var(--neon-cyan);
     }
 
     .session-card.active {
-      background: rgba(167, 139, 250, 0.1);
-      border-color: rgba(167, 139, 250, 0.3);
+      background: rgba(167, 139, 250, 0.08);
     }
 
-    .session-card.active::before {
+    .session-card.active::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 60%;
       background: var(--neon-purple);
+      border-radius: 0 2px 2px 0;
     }
+
+    /* Session Tooltip */
+    .session-tooltip {
+      position: absolute;
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-left: 8px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 11px;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .session-card:hover .session-tooltip {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .session-tooltip-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .session-tooltip-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .session-tooltip-row i {
+      width: 14px;
+      height: 14px;
+      opacity: 0.7;
+    }
+
+    .session-tooltip-row.cyan i { color: var(--neon-cyan); }
+    .session-tooltip-row.purple i { color: var(--neon-purple); }
+    .session-tooltip-row.green i { color: var(--neon-green); }
+    .session-tooltip-row.yellow i { color: var(--neon-yellow); }
 
     /* Sidebar Tabs */
     .sidebar-tab {
@@ -225,60 +265,73 @@
       border-bottom-color: var(--neon-cyan);
     }
 
-    /* Chat Message Styles - Clean & Soft */
+    /* Chat Message Styles - Terminal CLI Style (Block Layout) */
     .chat-msg {
-      padding: 14px 18px;
-      margin-bottom: 12px;
-      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
       position: relative;
+      border-radius: 8px;
     }
 
     .chat-msg.user {
-      border-right: 3px solid var(--neon-cyan);
-      border-left: none;
-      background: rgba(94, 231, 223, 0.04);
+      background: rgba(94, 231, 223, 0.03);
     }
 
     .chat-msg.assistant {
-      border-left: 3px solid var(--neon-purple);
-      background: rgba(167, 139, 250, 0.04);
-      margin-right: 0;
+      background: rgba(167, 139, 250, 0.03);
     }
 
-    .chat-label {
-      font-size: 12px;
-      font-weight: 500;
-      margin-bottom: 8px;
+    .chat-prompt {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 8px;
     }
 
-    .chat-label.user {
+    .chat-prompt.user {
       color: var(--neon-cyan);
     }
 
-    .chat-label.assistant {
+    .chat-prompt.user::before {
+      content: '❯';
+      opacity: 0.7;
+    }
+
+    .chat-prompt.assistant {
       color: var(--neon-purple);
     }
 
+    .chat-prompt.assistant::before {
+      content: '◆';
+      opacity: 0.7;
+    }
+
     .chat-text {
-      font-size: 15px;
+      font-size: 14px;
       line-height: 1.7;
       word-break: break-word;
       color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     .chat-time {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--text-muted);
-      margin-top: 10px;
+      margin-left: auto;
+      font-family: 'SF Mono', monospace;
+      opacity: 0.5;
+    }
+
+    .chat-msg:hover .chat-time {
+      opacity: 1;
     }
 
     /* Tool/Thinking/Result - Subtle & Collapsible */
     .msg-tool, .msg-thinking, .msg-result {
       background: var(--surface);
-      border-left: 2px solid var(--border-subtle);
       border-radius: 8px;
       margin: 8px 0;
       margin-left: 12px;
@@ -290,39 +343,45 @@
       opacity: 1;
     }
 
+    /* Tool icon container */
     .msg-tool {
-      border-left-color: var(--neon-green);
+      padding: 4px 0;
     }
 
     .msg-thinking {
-      border-left-color: var(--neon-yellow);
+      border-left: 2px solid var(--neon-yellow);
     }
 
     .msg-result {
-      border-left-color: var(--neon-cyan);
+      border-left: 2px solid var(--neon-cyan);
     }
 
     @media (max-width: 767px) {
       .chat-msg {
-        padding: 10px 12px;
-        margin-bottom: 6px;
+        padding: 6px 0;
+        margin-bottom: 2px;
       }
 
-      .chat-msg.user {
-        margin-left: 10px;
-      }
-
-      .chat-msg.assistant {
-        margin-right: 10px;
+      .chat-prompt {
+        font-size: 11px;
       }
 
       .chat-text {
-        font-size: 14px;
+        font-size: 13px;
+      }
+
+      .chat-time {
+        display: none;
       }
 
       .msg-tool, .msg-thinking, .msg-result {
-        margin-left: 8px;
-        margin-right: 10px;
+        margin-left: 16px;
+        margin-right: 0;
+      }
+
+      /* Hide tooltip on mobile - show stats inline instead */
+      .session-tooltip {
+        display: none;
       }
     }
 
@@ -462,6 +521,137 @@
     .json-null { color: var(--text-muted); }
     .json-bracket { color: var(--text-secondary); }
 
+    /* Code Syntax Highlighting - Claude Code style */
+    .code-keyword { color: #c792ea; }  /* purple - const, let, function, if, else, return */
+    .code-string { color: #c3e88d; }   /* green - strings */
+    .code-number { color: #f78c6c; }   /* orange - numbers */
+    .code-comment { color: #546e7a; font-style: italic; }  /* gray - comments */
+    .code-function { color: #82aaff; } /* blue - function names */
+    .code-variable { color: #eeffff; } /* white - variables */
+    .code-operator { color: #89ddff; } /* cyan - operators */
+    .code-punctuation { color: #89ddff; } /* cyan - brackets, etc */
+    .code-class { color: #ffcb6b; }    /* yellow - class names */
+    .code-property { color: #80cbc4; } /* teal - properties */
+    .code-tag { color: #f07178; }      /* red - HTML tags */
+    .code-attr { color: #ffcb6b; }     /* yellow - attributes */
+    .code-builtin { color: #82aaff; }  /* blue - built-in functions */
+
+    /* Code Block Wrapper - CLI Style */
+    .code-block-wrapper {
+      position: relative;
+      background: linear-gradient(180deg, #1a1f2e 0%, #0d1117 100%);
+      border: 1px solid rgba(94, 231, 223, 0.15);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .code-lang-badge {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: linear-gradient(135deg, rgba(94, 231, 223, 0.15), rgba(167, 139, 250, 0.15));
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 9px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      padding: 4px 10px;
+      border-bottom-left-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .code-block-content {
+      display: flex;
+      padding: 12px;
+      padding-right: 16px;
+      overflow-x: auto;
+    }
+
+    .code-line-nums {
+      color: rgba(255, 255, 255, 0.2);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 11px;
+      line-height: 1.6;
+      text-align: right;
+      padding-right: 12px;
+      margin-right: 12px;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      user-select: none;
+      white-space: pre;
+    }
+
+    .code-block {
+      flex: 1;
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #e6e6e6;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    /* Inline Code */
+    .inline-code {
+      background: rgba(94, 231, 223, 0.1);
+      color: #5ee7df;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 0.85em;
+      border: 1px solid rgba(94, 231, 223, 0.2);
+    }
+
+    /* Markdown Headings */
+    .md-h1 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--neon-cyan);
+      margin-top: 16px;
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid rgba(94, 231, 223, 0.2);
+    }
+
+    .md-h2 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--neon-purple);
+      margin-top: 12px;
+      margin-bottom: 6px;
+    }
+
+    .md-h3 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-top: 10px;
+      margin-bottom: 4px;
+    }
+
+    /* Markdown List Items */
+    .md-list-item {
+      padding-left: 16px;
+      position: relative;
+      margin: 4px 0;
+    }
+
+    .md-list-item::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--neon-cyan);
+      opacity: 0.6;
+    }
+
+    .md-list-item.numbered::before {
+      content: counter(list-counter) '.';
+      counter-increment: list-counter;
+      color: var(--neon-purple);
+    }
+
     /* Collapsible */
     .collapsible-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
     .collapsible-content.open { max-height: 2000px; }
@@ -508,6 +698,20 @@
     @keyframes live-pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(0, 255, 255, 0.1);
+      border-top-color: var(--neon-cyan);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     /* Fade in */
@@ -920,7 +1124,7 @@
           <i data-lucide="menu" class="w-5 h-5"></i>
         </button>
         <div class="flex-1 min-w-0 text-center">
-          <span class="font-pixel text-[8px] neon-cyan">CLAUDE</span>
+          <span class="text-xs font-bold neon-cyan">CLAUDE</span>
           <span class="font-terminal text-sm neon-magenta ml-1">TERMINAL</span>
         </div>
         <button class="menu-btn right-menu" onclick="openRightPanel()">
@@ -935,7 +1139,7 @@
         </div>
         <div id="sessionMeta" class="hidden sm:flex items-center gap-2 text-xs text-white/40 flex-shrink-0"></div>
         <div class="flex items-center gap-1 flex-shrink-0">
-          <button onclick="toggleAutoScroll()" id="autoScrollBtn" class="toolbar-btn" title="Auto scroll">
+          <button onclick="toggleAutoScroll()" id="autoScrollBtn" class="toolbar-btn active" title="Auto scroll (ON)">
             <i data-lucide="arrow-down-circle" class="w-4 h-4"></i>
           </button>
           <button onclick="exportSession()" class="toolbar-btn" title="Export">
@@ -976,7 +1180,7 @@
       </button>
 
       <div class="p-2 lg:p-3 border-b border-purple-500/30">
-        <h2 class="font-pixel text-[8px] lg:text-[9px] tracking-wider flex items-center gap-2">
+        <h2 class="text-xs font-semibold tracking-wider flex items-center gap-2">
           <span class="neon-green">⚡</span>
           <span class="text-purple-400">LIVE FEED</span>
         </h2>
@@ -984,7 +1188,7 @@
       <div class="flex-1 overflow-y-auto p-2 space-y-2" id="liveUpdates">
         <div class="text-center py-6">
           <div class="font-terminal text-sm lg:text-lg text-purple-500/50 pulse-neon">AWAITING INPUT...</div>
-          <div class="font-pixel text-[6px] text-purple-500/30 mt-2">MONITORING</div>
+          <div class="text-[10px] text-purple-500/30 mt-2 font-mono">MONITORING</div>
         </div>
       </div>
 
@@ -1030,6 +1234,21 @@
   </nav>
 
   <script>
+    // Clean XML-like system tags from text
+    function cleanSystemTags(text) {
+      if (!text || typeof text !== 'string') return text;
+      let cleaned = text
+        .replace(/<command-name>[^<]*<\/command-name>/g, '')
+        .replace(/<command-message>[^<]*<\/command-message>/g, '')
+        .replace(/<command-args>[^<]*<\/command-args>/g, '')
+        .replace(/<local-command-stdout>[\s\S]*?<\/local-command-stdout>/g, '')
+        .replace(/<local-command-caveat>[\s\S]*?<\/local-command-caveat>/g, '')
+        .replace(/Caveat:[\s\S]*?explicitly asks you to\./g, '')
+        .replace(/\n\s*\n/g, '\n')
+        .trim();
+      return cleaned || 'No summary';
+    }
+
     // State
     let ws = null;
     let sessions = [];
@@ -1040,6 +1259,12 @@
     let totalSessions = 0;
     let hasMoreSessions = false;
     let isLoadingMore = false;
+
+    // Message pagination state
+    let currentMessageOffset = 0;
+    let hasMoreMessages = false;
+    let isLoadingMessages = false;
+    let totalMessages = 0;
 
     // Mobile Menu Functions
     function openSidebar() {
@@ -1123,7 +1348,26 @@
           break;
         case 'sessionDetails':
           currentSessionData = data.data;
+          // Update pagination state
+          if (data.data?.pagination) {
+            currentMessageOffset = data.data.pagination.offset + data.data.messages.length;
+            hasMoreMessages = data.data.pagination.hasMore;
+            totalMessages = data.data.pagination.total;
+            console.log('Pagination:', {
+              offset: currentMessageOffset,
+              hasMore: hasMoreMessages,
+              total: totalMessages,
+              messagesLoaded: data.data.messages.length,
+              rawPagination: data.data.pagination
+            });
+          }
           renderSessionDetails(data.data);
+          break;
+        case 'moreMessages':
+          // Prepend older messages
+          if (data.data?.messages && currentSessionData) {
+            prependOlderMessages(data.data);
+          }
           break;
         case 'refresh':
           refreshSessions();
@@ -1187,24 +1431,41 @@
       }
 
       let html = filtered.map(session => {
-        const summary = typeof session.summary === 'string' ? session.summary : 'No summary';
+        const rawSummary = typeof session.summary === 'string' ? session.summary : 'No summary';
+        const summary = cleanSystemTags(rawSummary);
         const isActive = currentSession?.id === session.id;
         const projectName = session.project.split('/').pop() || session.project;
         const model = session.model || '';
-        const modelShort = model.includes('opus') ? 'OPUS' : model.includes('sonnet') ? 'SONNET' : model.includes('haiku') ? 'HAIKU' : '';
+        const modelShort = model.includes('opus') ? 'OP' : model.includes('sonnet') ? 'SN' : model.includes('haiku') ? 'HK' : '';
 
+        const isCompleted = session.isCompleted;
         return `
-          <div class="session-card px-3 py-2 cursor-pointer ${isActive ? 'active' : ''}" onclick="loadSession('${session.projectRaw}', '${session.id}')">
-            <div class="flex items-center justify-between gap-2 mb-1">
-              <span class="text-xs text-cyan-400 font-medium truncate">${escapeHtml(projectName)}</span>
-              <span class="text-[10px] text-white/30 flex-shrink-0">${formatTime(session.lastModified)}</span>
+          <div class="session-card cursor-pointer ${isActive ? 'active' : ''}" onclick="loadSession('${session.projectRaw}', '${session.id}')">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-xs text-cyan-400/80 font-medium truncate">${escapeHtml(projectName)}</span>
+              ${modelShort ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400">${modelShort}</span>` : ''}
+              ${isCompleted ? '<i data-lucide="check-circle" class="w-3 h-3 text-green-400 ml-auto flex-shrink-0"></i>' : '<i data-lucide="circle-dot" class="w-3 h-3 text-yellow-400 ml-auto flex-shrink-0 animate-pulse"></i>'}
             </div>
-            <div class="text-sm text-white/70 line-clamp-2 mb-1.5">${escapeHtml(summary.substring(0, 60))}</div>
-            <div class="flex items-center gap-3 text-[10px] text-white/40">
-              ${modelShort ? `<span class="text-purple-400">${modelShort}</span>` : ''}
-              <span>${session.messageCount} msg</span>
-              <span>${formatNumber(session.totalTokens)}</span>
-              ${session.toolUses.length > 0 ? `<span>${session.toolUses.length} tools</span>` : ''}
+            <div class="text-[13px] text-white/60 line-clamp-2 leading-snug">${escapeHtml(summary.substring(0, 80))}</div>
+
+            <!-- Hover Tooltip -->
+            <div class="session-tooltip">
+              <div class="session-tooltip-row cyan">
+                <i data-lucide="message-square"></i>
+                <span>${session.messageCount} messages</span>
+              </div>
+              <div class="session-tooltip-row green">
+                <i data-lucide="wrench"></i>
+                <span>${session.toolUses.length} tools</span>
+              </div>
+              <div class="session-tooltip-row purple">
+                <i data-lucide="coins"></i>
+                <span>${formatNumber(session.totalTokens)} tokens</span>
+              </div>
+              <div class="session-tooltip-row yellow">
+                <i data-lucide="clock"></i>
+                <span>${formatTime(session.lastModified)}</span>
+              </div>
             </div>
           </div>
         `;
@@ -1225,16 +1486,104 @@
       lucide.createIcons();
     }
 
+    // Loading state management
+    let loadingTimeout = null;
+    let pendingSessionId = null;
+
     function loadSession(projectRaw, sessionId) {
       currentSession = sessions.find(s => s.id === sessionId);
-      ws.send(JSON.stringify({ type: 'getSession', projectRaw, sessionId }));
+      pendingSessionId = sessionId;
+
+      // Reset pagination state
+      currentMessageOffset = 0;
+      hasMoreMessages = false;
+      isLoadingMessages = false;
+      totalMessages = 0;
+
+      // Clear any existing timeout
+      if (loadingTimeout) {
+        clearTimeout(loadingTimeout);
+        loadingTimeout = null;
+      }
+
+      // Show loading state immediately
+      const container = document.getElementById('messageContainer');
+      container.innerHTML = `
+        <div class="flex items-center justify-center h-full">
+          <div class="text-center">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <div class="text-sm text-white/50 font-mono">Loading session...</div>
+          </div>
+        </div>
+      `;
+
+      // Update title with loading state
+      const projectName = currentSession?.project?.split('/').pop() || 'Loading';
+      document.getElementById('sessionTitle').innerHTML = `
+        <span class="text-sm text-white/90 truncate">${escapeHtml(projectName)}</span>
+        <span class="text-xs text-white/30 hidden sm:inline">#${sessionId.substring(0, 8)}</span>
+      `;
+
+      // Set timeout for loading (5 seconds)
+      loadingTimeout = setTimeout(() => {
+        if (pendingSessionId === sessionId) {
+          container.innerHTML = `
+            <div class="flex items-center justify-center h-full">
+              <div class="text-center">
+                <i data-lucide="alert-circle" class="w-12 h-12 mx-auto mb-3 text-yellow-400/50"></i>
+                <div class="text-sm text-yellow-400/70 mb-3">Loading took too long</div>
+                <button onclick="loadSession('${projectRaw}', '${sessionId}')" class="retro-btn text-xs">
+                  <span class="flex items-center gap-2">
+                    <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                    Retry
+                  </span>
+                </button>
+              </div>
+            </div>
+          `;
+          lucide.createIcons();
+          pendingSessionId = null;
+        }
+      }, 5000);
+
+      // Check WebSocket connection before sending
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'getSession', projectRaw, sessionId }));
+      } else {
+        // WebSocket not ready - show error immediately
+        clearTimeout(loadingTimeout);
+        container.innerHTML = `
+          <div class="flex items-center justify-center h-full">
+            <div class="text-center">
+              <i data-lucide="wifi-off" class="w-12 h-12 mx-auto mb-3 text-red-400/50"></i>
+              <div class="text-sm text-red-400/70 mb-3">Not connected to server</div>
+              <button onclick="connect(); setTimeout(() => loadSession('${projectRaw}', '${sessionId}'), 1000);" class="retro-btn text-xs">
+                <span class="flex items-center gap-2">
+                  <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                  Reconnect
+                </span>
+              </button>
+            </div>
+          </div>
+        `;
+        lucide.createIcons();
+        pendingSessionId = null;
+      }
+
       renderSessions();
       closeSidebar(); // Close sidebar on mobile after selection
     }
 
     function renderSessionDetails(data) {
+      // Clear loading timeout - we got the data
+      if (loadingTimeout) {
+        clearTimeout(loadingTimeout);
+        loadingTimeout = null;
+      }
+      pendingSessionId = null;
+
       if (!data) {
-        document.getElementById('messageContainer').innerHTML = `<div class="flex items-center justify-center h-full"><div class="text-center"><div class="font-pixel text-sm neon-pink mb-4">ERROR: NOT FOUND</div></div></div>`;
+        document.getElementById('messageContainer').innerHTML = `<div class="flex items-center justify-center h-full"><div class="text-center"><div class="text-sm font-semibold neon-pink mb-4">Session not found</div></div></div>`;
         return;
       }
 
@@ -1247,8 +1596,10 @@
       const thinkingLevel = getThinkingLevel(data.messages);
       const model = data.stats.model || 'unknown';
       const modelShort = model.includes('opus') ? 'Opus' : model.includes('sonnet') ? 'Sonnet' : model.includes('haiku') ? 'Haiku' : model.split('-')[0];
+      const isCompleted = data.stats.isCompleted;
 
       document.getElementById('sessionMeta').innerHTML = `
+        ${isCompleted ? '<span class="text-green-400 flex items-center gap-1"><i data-lucide="check-circle" class="w-3 h-3"></i>Done</span>' : '<span class="text-yellow-400 flex items-center gap-1"><i data-lucide="loader" class="w-3 h-3 animate-spin"></i>Active</span>'}
         ${thinkingLevel ? `<span class="text-yellow-400">${thinkingLevel}</span>` : ''}
         <span class="text-purple-400">${modelShort}</span>
         <span>${data.stats.messageCount} msg</span>
@@ -1263,20 +1614,126 @@
       const toolBar = document.getElementById('toolSummary');
       if (data.stats.toolUses.length > 0) {
         toolBar.classList.remove('hidden');
-        toolBar.innerHTML = `
-          <span>Tools:</span>
-          ${data.stats.toolUses.slice(0, 6).map(t => `<span class="text-green-400">${escapeHtml(t)}</span>`).join('')}
-          ${data.stats.toolUses.length > 6 ? `<span class="text-white/30">+${data.stats.toolUses.length - 6}</span>` : ''}
-        `;
+        // Clear existing content safely
+        toolBar.textContent = '';
+        // Create icon elements for each tool
+        data.stats.toolUses.slice(0, 8).forEach(t => {
+          const icon = getToolIcon(t);
+          const color = getToolColor(t);
+          const span = document.createElement('span');
+          span.className = `${color} opacity-70 hover:opacity-100 transition-opacity cursor-help`;
+          span.title = t;
+          const iconEl = document.createElement('i');
+          iconEl.setAttribute('data-lucide', icon);
+          iconEl.className = 'w-4 h-4';
+          span.appendChild(iconEl);
+          toolBar.appendChild(span);
+        });
+        if (data.stats.toolUses.length > 8) {
+          const moreSpan = document.createElement('span');
+          moreSpan.className = 'text-white/40 text-[10px] ml-1';
+          moreSpan.textContent = `+${data.stats.toolUses.length - 8}`;
+          toolBar.appendChild(moreSpan);
+        }
+        lucide.createIcons();
       } else {
         toolBar.classList.add('hidden');
       }
 
       const container = document.getElementById('messageContainer');
-      container.innerHTML = renderMessages(data.messages);
+
+      // Build HTML with "Load older" button if there are more messages
+      let html = '';
+      if (hasMoreMessages) {
+        const remaining = totalMessages - currentMessageOffset;
+        html += `
+          <div id="loadOlderContainer" class="text-center py-3 border-b border-white/5 mb-3">
+            <button onclick="loadMoreMessages()" id="loadOlderBtn" class="retro-btn text-xs px-4 py-2">
+              <span class="flex items-center gap-2">
+                <i data-lucide="chevrons-up" class="w-4 h-4"></i>
+                Load older messages (${remaining} more)
+              </span>
+            </button>
+          </div>
+        `;
+      }
+      html += renderMessages(data.messages);
+      container.innerHTML = html;
       lucide.createIcons();
 
       if (autoScroll) container.scrollTop = container.scrollHeight;
+    }
+
+    // Load more (older) messages
+    function loadMoreMessages() {
+      if (isLoadingMessages || !hasMoreMessages || !currentSession) return;
+      isLoadingMessages = true;
+
+      // Update button to show loading
+      const btn = document.getElementById('loadOlderBtn');
+      if (btn) {
+        btn.innerHTML = `
+          <span class="flex items-center gap-2">
+            <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+            Loading...
+          </span>
+        `;
+        lucide.createIcons();
+      }
+
+      ws.send(JSON.stringify({
+        type: 'loadMoreMessages',
+        projectRaw: currentSession.projectRaw,
+        sessionId: currentSession.id,
+        offset: currentMessageOffset,
+        limit: 50
+      }));
+    }
+
+    // Prepend older messages to the container
+    function prependOlderMessages(data) {
+      isLoadingMessages = false;
+
+      if (!data.messages || data.messages.length === 0) {
+        hasMoreMessages = false;
+        const loadContainer = document.getElementById('loadOlderContainer');
+        if (loadContainer) loadContainer.remove();
+        return;
+      }
+
+      // Update state
+      currentMessageOffset += data.messages.length;
+      hasMoreMessages = data.pagination?.hasMore || false;
+
+      // Prepend messages to currentSessionData
+      currentSessionData.messages = [...data.messages, ...currentSessionData.messages];
+
+      // Remember scroll position
+      const container = document.getElementById('messageContainer');
+      const oldScrollHeight = container.scrollHeight;
+
+      // Rebuild the message container
+      let html = '';
+      if (hasMoreMessages) {
+        const remaining = totalMessages - currentMessageOffset;
+        html += `
+          <div id="loadOlderContainer" class="text-center py-3 border-b border-white/5 mb-3">
+            <button onclick="loadMoreMessages()" id="loadOlderBtn" class="retro-btn text-xs px-4 py-2">
+              <span class="flex items-center gap-2">
+                <i data-lucide="chevrons-up" class="w-4 h-4"></i>
+                Load older messages (${remaining} more)
+              </span>
+            </button>
+          </div>
+        `;
+      }
+      html += renderMessages(currentSessionData.messages);
+      container.innerHTML = html;
+      lucide.createIcons();
+
+      // Restore scroll position (keep user at same relative position)
+      const newScrollHeight = container.scrollHeight;
+      container.scrollTop = newScrollHeight - oldScrollHeight;
     }
 
     function getThinkingLevel(messages) {
@@ -1284,6 +1741,73 @@
         if (msg.raw?.thinkingMetadata?.level) return msg.raw.thinkingMetadata.level;
       }
       return null;
+    }
+
+    // Format special user messages (commands, caveats, etc.)
+    function formatUserMessage(content) {
+      // Check for command messages
+      const commandMatch = content.match(/<command-name>(.*?)<\/command-name>/);
+      const commandMsgMatch = content.match(/<command-message>(.*?)<\/command-message>/);
+
+      // Check for local command output
+      const stdoutMatch = content.match(/<local-command-stdout>([\s\S]*?)<\/local-command-stdout>/);
+
+      // Check for Caveat warning
+      const hasCaveat = content.includes('Caveat:') && content.includes('local commands');
+
+      // If it's a slash command
+      if (commandMatch && commandMsgMatch) {
+        const cmd = commandMatch[1];
+        return {
+          isSystem: true,
+          html: `
+            <div class="msg-system fade-in px-3 py-2 opacity-60">
+              <div class="flex items-center gap-2">
+                <i data-lucide="terminal" class="w-3 h-3 text-cyan-400"></i>
+                <span class="text-cyan-400 text-xs font-mono">Command</span>
+                <span class="text-cyan-300/70 text-xs font-mono">${escapeHtml(cmd)}</span>
+              </div>
+            </div>
+          `
+        };
+      }
+
+      // If it's command output
+      if (stdoutMatch) {
+        const output = stdoutMatch[1].trim();
+        return {
+          isSystem: true,
+          html: `
+            <div class="msg-system fade-in px-3 py-2 opacity-60">
+              <div class="flex items-center gap-2">
+                <i data-lucide="corner-down-right" class="w-3 h-3 text-gray-400"></i>
+                <span class="text-gray-400 text-xs font-mono">${escapeHtml(output)}</span>
+              </div>
+            </div>
+          `
+        };
+      }
+
+      // If it's just a caveat message, hide it
+      if (hasCaveat && content.includes('DO NOT respond')) {
+        return { isSystem: true, html: '' };
+      }
+
+      // Clean up any remaining XML-like tags for normal messages
+      let cleanContent = content
+        .replace(/<command-name>.*?<\/command-name>/g, '')
+        .replace(/<command-message>.*?<\/command-message>/g, '')
+        .replace(/<command-args>.*?<\/command-args>/g, '')
+        .replace(/<local-command-stdout>[\s\S]*?<\/local-command-stdout>/g, '')
+        .replace(/Caveat:.*?local commands\..*?explicitly asks you to\./gs, '')
+        .trim();
+
+      // If nothing left after cleanup, hide the message
+      if (!cleanContent) {
+        return { isSystem: true, html: '' };
+      }
+
+      return { isSystem: false, content: cleanContent };
     }
 
     function renderMessages(messages) {
@@ -1303,14 +1827,20 @@
           return renderAgentResultBlock(msg.content.results, msg.raw, msg.timestamp);
         }
         const content = typeof msg.content === 'string' ? msg.content : '';
+
+        // Parse and format special messages
+        const formatted = formatUserMessage(content);
+        if (formatted.isSystem) {
+          return formatted.html;
+        }
+
         return `
           <div class="chat-msg user fade-in">
-            <div class="chat-label user">
-              <i data-lucide="user" class="w-3 h-3"></i>
-              <span>You</span>
+            <div class="chat-prompt user">
+              <span>user</span>
+              ${msg.timestamp ? `<span class="chat-time">${formatTime(msg.timestamp)}</span>` : ''}
             </div>
             <div class="chat-text whitespace-pre-wrap">${escapeHtml(content)}</div>
-            ${msg.timestamp ? `<div class="chat-time">${formatTime(msg.timestamp)}</div>` : ''}
           </div>
         `;
       }
@@ -1346,29 +1876,30 @@
       const preview = thinking.substring(0, 80).replace(/\n/g, ' ');
       const id = 'think-' + Math.random().toString(36).substr(2, 9);
       return `
-        <div class="msg-thinking p-3 fade-in cursor-pointer" onclick="toggleThinking('${id}')">
+        <div class="msg-thinking px-3 py-2 fade-in cursor-pointer" onclick="toggleThinking('${id}')">
           <div class="flex items-center gap-2">
-            <i data-lucide="brain" class="w-4 h-4 text-yellow-400"></i>
-            <span class="text-yellow-400 text-sm font-medium">Thinking...</span>
-            <i data-lucide="chevron-down" class="w-4 h-4 text-yellow-400/50 ml-auto transition-transform" id="${id}-icon"></i>
+            <span class="text-yellow-400 opacity-60">◇</span>
+            <span class="text-yellow-400 text-xs font-mono">thinking</span>
+            <span class="text-yellow-400/40 text-xs font-mono flex-1 truncate">${escapeHtml(preview)}...</span>
+            <i data-lucide="chevron-down" class="w-3 h-3 text-yellow-400/40 transition-transform" id="${id}-icon"></i>
           </div>
-          <div class="text-xs text-yellow-500/60 mt-1 truncate">${escapeHtml(preview)}...</div>
           <div id="${id}" class="collapsible-content">
-            <div class="text-sm text-yellow-200/70 mt-2 whitespace-pre-wrap break-words bg-black/20 p-3 rounded max-h-48 lg:max-h-64 overflow-auto">${escapeHtml(thinking)}</div>
+            <div class="text-xs text-yellow-200/70 mt-2 whitespace-pre-wrap break-words bg-black/20 p-2 rounded max-h-48 lg:max-h-64 overflow-auto font-mono">${escapeHtml(thinking)}</div>
           </div>
         </div>
       `;
     }
 
     function renderTextBlock(text, timestamp) {
+      // Use markdown rendering with syntax highlighting for code blocks
+      const renderedText = renderMarkdownLite(text);
       return `
         <div class="chat-msg assistant fade-in">
-          <div class="chat-label assistant">
-            <i data-lucide="sparkles" class="w-3 h-3"></i>
-            <span>Claude</span>
+          <div class="chat-prompt assistant">
+            <span>claude</span>
+            ${timestamp ? `<span class="chat-time">${formatTime(timestamp)}</span>` : ''}
           </div>
-          <div class="chat-text whitespace-pre-wrap">${escapeHtml(text)}</div>
-          ${timestamp ? `<div class="chat-time">${formatTime(timestamp)}</div>` : ''}
+          <div class="chat-text">${renderedText}</div>
         </div>
       `;
     }
@@ -1377,24 +1908,69 @@
       return renderToolBlock(block.name || 'Tool', block.input || {});
     }
 
+    function getToolColor(toolName) {
+      const name = toolName.toLowerCase();
+      // แต่ละ tool มีสีต่างกัน
+      if (name.includes('bash') || name.includes('shell')) return 'text-green-400';
+      if (name.includes('read') || name.includes('cat')) return 'text-cyan-400';
+      if (name.includes('write') || name.includes('edit')) return 'text-amber-400';
+      if (name.includes('glob') || name.includes('find')) return 'text-purple-400';
+      if (name.includes('grep') || name.includes('search')) return 'text-pink-400';
+      if (name.includes('task') || name.includes('agent')) return 'text-blue-400';
+      if (name.includes('web') || name.includes('fetch')) return 'text-orange-400';
+      if (name.includes('todo')) return 'text-yellow-400';
+      if (name.includes('mcp')) return 'text-rose-400';
+      return 'text-green-400'; // default
+    }
+
+    function getToolIcon(toolName) {
+      const name = toolName.toLowerCase();
+      // Lucide icons ที่สื่อถึงแต่ละ tool
+      if (name.includes('bash') || name.includes('shell')) return 'terminal';
+      if (name.includes('read')) return 'file-text';
+      if (name.includes('write')) return 'file-plus';
+      if (name.includes('edit') || name.includes('multiedit')) return 'file-pen';
+      if (name.includes('glob') || name.includes('find') || name.includes('ls')) return 'folder-search';
+      if (name.includes('grep') || name.includes('search')) return 'search';
+      if (name.includes('task') || name.includes('agent')) return 'bot';
+      if (name.includes('webfetch') || name.includes('fetch')) return 'globe';
+      if (name.includes('websearch')) return 'search';
+      if (name.includes('todo')) return 'list-checks';
+      if (name.includes('ask')) return 'message-circle-question';
+      if (name.includes('notebook')) return 'notebook-pen';
+      // MCP tools - specific icons
+      if (name.includes('playwright') || name.includes('browser')) return 'chrome';
+      if (name.includes('firebase')) return 'flame';
+      if (name.includes('greptile')) return 'git-pull-request';
+      if (name.includes('context7')) return 'book-open';
+      if (name.includes('mcp')) return 'plug';
+      return 'wrench'; // default tool icon
+    }
+
     function renderToolBlock(toolName, input) {
       const id = 'json-' + Math.random().toString(36).substr(2, 9);
       const jsonStr = JSON.stringify(input, null, 2);
       const preview = getJsonPreview(input);
-      const isLarge = jsonStr.length > 150;
+      // แสดง collapsible ถ้า json ยาวกว่า 100 หรือมี key มากกว่า 1
+      const hasContent = Object.keys(input || {}).length > 0;
+      const isLarge = jsonStr.length > 100 || Object.keys(input || {}).length > 1;
+      const color = getToolColor(toolName);
+      const icon = getToolIcon(toolName);
+      // สร้าง short class name สำหรับ MCP tools
+      const shortName = toolName.toLowerCase().replace(/^mcp__[^_]+_[^_]+__/, '').replace(/[^a-z]/g, '');
 
       return `
-        <div class="msg-tool p-3 fade-in">
-          <div class="flex items-center gap-2 mb-2 text-xs">
-            <i data-lucide="terminal" class="w-3 h-3 text-green-400"></i>
-            <span class="text-green-400 font-medium">${escapeHtml(toolName)}</span>
+        <div class="msg-tool msg-tool-${shortName} flex items-start gap-2 fade-in">
+          <div class="flex-shrink-0 w-6 h-6 flex items-center justify-center ${color} opacity-70">
+            <i data-lucide="${icon}" class="w-4 h-4"></i>
           </div>
-          <div class="font-code text-xs">
-            <div class="p-2 cursor-pointer hover:bg-green-500/5 rounded flex items-center gap-2" onclick="toggleJson('${id}')">
-              <span class="text-green-400/60 flex-1 truncate">${escapeHtml(preview)}</span>
-              ${isLarge ? `<i data-lucide="chevron-down" class="w-3 h-3 text-green-400/50 transition-transform" id="${id}-icon"></i>` : ''}
+          <div class="flex-1 px-3 py-2 min-w-0">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="toggleJson('${id}')">
+              <span class="${color} text-xs font-mono font-semibold">${escapeHtml(toolName)}</span>
+              <span class="${color}/40 text-xs font-mono flex-1 truncate">${escapeHtml(preview)}</span>
+              ${hasContent ? `<i data-lucide="chevron-down" class="w-3 h-3 ${color}/40 transition-transform" id="${id}-icon"></i>` : ''}
             </div>
-            ${isLarge ? `<div id="${id}" class="collapsible-content"><div class="p-2 border-t border-green-500/20 max-h-48 overflow-auto">${syntaxHighlight(jsonStr)}</div></div>` : ''}
+            ${hasContent ? `<div id="${id}" class="collapsible-content"><div class="mt-2 p-2 bg-black/20 rounded text-xs font-mono max-h-48 overflow-auto">${syntaxHighlight(jsonStr)}</div></div>` : ''}
           </div>
         </div>
       `;
@@ -1416,19 +1992,14 @@
       }
 
       return `
-        <div class="msg-result p-3 fade-in">
-          <div class="flex items-center gap-2 mb-2 text-xs">
-            <i data-lucide="arrow-left" class="w-3 h-3 text-cyan-400/60"></i>
-            <span class="text-cyan-400/60">Result</span>
-            ${isJson ? '<span class="badge text-cyan-400/80 text-[9px]">JSON</span>' : ''}
+        <div class="msg-result px-3 py-2 fade-in">
+          <div class="flex items-center gap-2 cursor-pointer" onclick="toggleJson('${id}')">
+            <span class="text-cyan-400 opacity-60">←</span>
+            <span class="text-cyan-400/50 text-xs font-mono flex-1 truncate">${escapeHtml(preview)}${isLarge ? '...' : ''}</span>
+            ${isJson ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400">JSON</span>' : ''}
+            ${isLarge ? `<i data-lucide="chevron-down" class="w-3 h-3 text-cyan-400/40" id="${id}-icon"></i>` : ''}
           </div>
-          <div class="font-code text-xs">
-            <div class="p-2 cursor-pointer hover:bg-cyan-500/5 rounded flex items-center gap-2" onclick="toggleJson('${id}')">
-              <span class="text-cyan-400/50 flex-1 truncate">${escapeHtml(preview)}${isLarge ? '...' : ''}</span>
-              ${isLarge ? `<i data-lucide="chevron-down" class="w-3 h-3 text-cyan-400/50" id="${id}-icon"></i>` : ''}
-            </div>
-            ${isLarge ? `<div id="${id}" class="collapsible-content"><div class="p-2 border-t border-cyan-500/10 max-h-48 overflow-auto ${isJson ? '' : 'whitespace-pre-wrap'}">${jsonContent}</div></div>` : ''}
-          </div>
+          ${isLarge ? `<div id="${id}" class="collapsible-content"><div class="mt-2 p-2 bg-black/20 rounded text-xs font-mono max-h-48 overflow-auto ${isJson ? '' : 'whitespace-pre-wrap'}">${jsonContent}</div></div>` : ''}
         </div>
       `;
     }
@@ -1445,36 +2016,140 @@
       const isLarge = fullContent.length > 150;
 
       return `
-        <div class="msg-result p-3 fade-in border-l-4 border-l-cyan-400">
-          <div class="flex items-center gap-2 flex-wrap mb-2 text-xs">
-            <i data-lucide="bot" class="w-3 h-3 text-cyan-400"></i>
-            <span class="text-cyan-400 font-medium">Agent</span>
-            <span class="text-cyan-400/50">#${escapeHtml(agentId.substring(0, 8))}</span>
-            ${duration ? `<span class="text-purple-400/70">${duration}</span>` : ''}
-            ${tokens ? `<span class="text-yellow-400/70">${tokens} tok</span>` : ''}
-            ${toolCount ? `<span class="text-green-400/70">${toolCount} tools</span>` : ''}
+        <div class="msg-result px-3 py-2 fade-in border-l-2 border-l-purple-400">
+          <div class="flex items-center gap-2 cursor-pointer" onclick="toggleJson('${id}')">
+            <span class="text-purple-400 opacity-60">⬡</span>
+            <span class="text-purple-400 text-xs font-mono">agent</span>
+            <span class="text-purple-400/40 text-[10px] font-mono">#${escapeHtml(agentId.substring(0, 8))}</span>
+            ${duration ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400">${duration}</span>` : ''}
+            ${tokens ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400">${tokens}</span>` : ''}
+            ${toolCount ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-green-500/20 text-green-400">${toolCount}⚙</span>` : ''}
+            <span class="flex-1"></span>
+            ${isLarge ? `<i data-lucide="chevron-down" class="w-3 h-3 text-purple-400/40" id="${id}-icon"></i>` : ''}
           </div>
-          <div class="font-code text-xs">
-            <div class="p-2 cursor-pointer hover:bg-cyan-500/5 rounded flex items-center gap-2" onclick="toggleJson('${id}')">
-              <span class="text-cyan-400/60 flex-1 truncate">${escapeHtml(preview)}${isLarge ? '...' : ''}</span>
-              ${isLarge ? `<i data-lucide="chevron-down" class="w-3 h-3 text-cyan-400/50" id="${id}-icon"></i>` : ''}
-            </div>
-            ${isLarge ? `<div id="${id}" class="collapsible-content"><div class="p-2 border-t border-cyan-500/10 text-cyan-100/80 whitespace-pre-wrap break-words max-h-48 overflow-auto">${renderMarkdownLite(fullContent)}</div></div>` : `<div class="p-2 text-cyan-100/80 whitespace-pre-wrap break-words">${renderMarkdownLite(fullContent)}</div>`}
+          <div class="mt-2 text-xs">
+            ${isLarge ? `<div class="text-purple-400/50 truncate cursor-pointer" onclick="toggleJson('${id}')">${escapeHtml(preview)}...</div><div id="${id}" class="collapsible-content"><div class="mt-2 p-2 bg-black/20 rounded text-purple-100/80 whitespace-pre-wrap break-words max-h-48 overflow-auto">${renderMarkdownLite(fullContent)}</div></div>` : `<div class="text-purple-100/80 whitespace-pre-wrap break-words">${renderMarkdownLite(fullContent)}</div>`}
           </div>
         </div>
       `;
     }
 
+    function highlightCode(code, lang) {
+      // Escape HTML first
+      let escaped = escapeHtml(code);
+
+      // Language-specific or generic highlighting
+      const isJsLike = ['js', 'javascript', 'ts', 'typescript', 'jsx', 'tsx'].includes(lang);
+      const isPython = ['py', 'python'].includes(lang);
+      const isHtml = ['html', 'xml', 'jsx', 'tsx'].includes(lang);
+      const isCss = ['css', 'scss', 'sass'].includes(lang);
+      const isShell = ['bash', 'sh', 'shell', 'zsh'].includes(lang);
+
+      // Comments (do first to avoid conflicts)
+      escaped = escaped.replace(/(\/\/.*?)(?=<br>|$)/g, '<span class="code-comment">$1</span>');
+      escaped = escaped.replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="code-comment">$1</span>');
+      escaped = escaped.replace(/(#.*?)(?=<br>|$)/g, '<span class="code-comment">$1</span>');
+
+      // Strings (single and double quotes)
+      escaped = escaped.replace(/(&quot;(?:[^&]|&(?!quot;))*?&quot;)/g, '<span class="code-string">$1</span>');
+      escaped = escaped.replace(/(&#39;(?:[^&]|&(?!#39;))*?&#39;)/g, '<span class="code-string">$1</span>');
+      escaped = escaped.replace(/(`[^`]*`)/g, '<span class="code-string">$1</span>');
+
+      // Keywords
+      const keywords = isJsLike
+        ? ['const', 'let', 'var', 'function', 'async', 'await', 'return', 'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'break', 'continue', 'try', 'catch', 'finally', 'throw', 'new', 'class', 'extends', 'import', 'export', 'from', 'default', 'typeof', 'instanceof', 'in', 'of', 'this', 'super', 'static', 'get', 'set', 'yield', 'void', 'delete', 'with', 'debugger']
+        : isPython
+        ? ['def', 'class', 'if', 'elif', 'else', 'for', 'while', 'try', 'except', 'finally', 'with', 'as', 'import', 'from', 'return', 'yield', 'raise', 'pass', 'break', 'continue', 'and', 'or', 'not', 'in', 'is', 'lambda', 'global', 'nonlocal', 'assert', 'async', 'await', 'True', 'False', 'None']
+        : isShell
+        ? ['if', 'then', 'else', 'elif', 'fi', 'for', 'do', 'done', 'while', 'until', 'case', 'esac', 'function', 'return', 'exit', 'export', 'local', 'readonly', 'declare', 'typeset', 'unset', 'shift', 'source', 'alias', 'echo', 'printf', 'read', 'set', 'unset', 'cd', 'pwd', 'ls', 'mkdir', 'rm', 'cp', 'mv', 'cat', 'grep', 'sed', 'awk', 'curl', 'wget', 'git', 'npm', 'yarn', 'pnpm', 'node', 'python', 'pip']
+        : ['function', 'return', 'if', 'else', 'for', 'while', 'break', 'continue', 'class', 'new', 'import', 'export'];
+
+      keywords.forEach(kw => {
+        const regex = new RegExp(`\\b(${kw})\\b(?![^<]*>)`, 'g');
+        escaped = escaped.replace(regex, '<span class="code-keyword">$1</span>');
+      });
+
+      // Numbers
+      escaped = escaped.replace(/\b(\d+\.?\d*)\b(?![^<]*>)/g, '<span class="code-number">$1</span>');
+
+      // Built-in functions/objects
+      const builtins = isJsLike
+        ? ['console', 'document', 'window', 'Array', 'Object', 'String', 'Number', 'Boolean', 'Promise', 'Math', 'JSON', 'Date', 'RegExp', 'Error', 'Map', 'Set', 'setTimeout', 'setInterval', 'fetch', 'require', 'module', 'process']
+        : isPython
+        ? ['print', 'len', 'range', 'str', 'int', 'float', 'list', 'dict', 'set', 'tuple', 'type', 'isinstance', 'hasattr', 'getattr', 'setattr', 'open', 'input', 'map', 'filter', 'zip', 'enumerate', 'sorted', 'reversed', 'sum', 'min', 'max', 'abs', 'round', 'all', 'any']
+        : [];
+
+      builtins.forEach(fn => {
+        const regex = new RegExp(`\\b(${fn})\\b(?![^<]*>)`, 'g');
+        escaped = escaped.replace(regex, '<span class="code-builtin">$1</span>');
+      });
+
+      // Function calls (word followed by parenthesis)
+      escaped = escaped.replace(/\b([a-zA-Z_]\w*)\s*(?=\()(?![^<]*>)/g, '<span class="code-function">$1</span>');
+
+      // Properties after dot
+      escaped = escaped.replace(/\.([a-zA-Z_]\w*)(?![^<]*>)/g, '.<span class="code-property">$1</span>');
+
+      // Operators
+      escaped = escaped.replace(/([=+\-*/%&|^!<>?:]+)(?![^<]*>)/g, '<span class="code-operator">$1</span>');
+
+      // Punctuation (brackets, etc)
+      escaped = escaped.replace(/([{}[\]();,])(?![^<]*>)/g, '<span class="code-punctuation">$1</span>');
+
+      return escaped;
+    }
+
     function renderMarkdownLite(text) {
       if (typeof text !== 'string') return '';
-      return escapeHtml(text)
-        .replace(/^### (.+)$/gm, '<div class="font-pixel text-[9px] text-cyan-300 mt-2 mb-1">$1</div>')
-        .replace(/^## (.+)$/gm, '<div class="font-pixel text-[10px] text-cyan-200 mt-3 mb-1">$1</div>')
-        .replace(/^# (.+)$/gm, '<div class="font-pixel text-[11px] neon-cyan mt-3 mb-2">$1</div>')
+
+      // First, extract and process code blocks separately
+      const codeBlocks = [];
+      let processed = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (match, lang, code) => {
+        const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
+        const trimmedCode = code.trim();
+        const highlighted = highlightCode(trimmedCode, lang.toLowerCase());
+        const langBadge = lang ? `<span class="code-lang-badge">${lang}</span>` : '';
+        const lineCount = trimmedCode.split('\n').length;
+        const lineNums = lineCount > 1 ? `<div class="code-line-nums">${Array.from({length: lineCount}, (_, i) => i + 1).join('\n')}</div>` : '';
+        codeBlocks.push(`
+          <div class="code-block-wrapper my-3">
+            ${langBadge}
+            <div class="code-block-content">
+              ${lineNums}
+              <pre class="code-block">${highlighted}</pre>
+            </div>
+          </div>
+        `);
+        return placeholder;
+      });
+
+      // Extract inline code before escaping
+      const inlineCode = [];
+      processed = processed.replace(/`([^`]+)`/g, (match, code) => {
+        const placeholder = `__INLINE_CODE_${inlineCode.length}__`;
+        inlineCode.push(`<code class="inline-code">${escapeHtml(code)}</code>`);
+        return placeholder;
+      });
+
+      // Escape HTML for the rest
+      processed = escapeHtml(processed);
+
+      // Restore code blocks and inline code
+      codeBlocks.forEach((block, i) => {
+        processed = processed.replace(`__CODE_BLOCK_${i}__`, block);
+      });
+      inlineCode.forEach((code, i) => {
+        processed = processed.replace(`__INLINE_CODE_${i}__`, code);
+      });
+
+      return processed
+        .replace(/^### (.+)$/gm, '<div class="md-h3">$1</div>')
+        .replace(/^## (.+)$/gm, '<div class="md-h2">$1</div>')
+        .replace(/^# (.+)$/gm, '<div class="md-h1">$1</div>')
         .replace(/\*\*(.+?)\*\*/g, '<strong class="text-white">$1</strong>')
-        .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="bg-black/50 border border-cyan-500/20 p-2 my-2 text-[10px] overflow-x-auto">$2</pre>')
-        .replace(/`([^`]+)`/g, '<code class="bg-black/30 px-1 text-cyan-300">$1</code>')
-        .replace(/^- (.+)$/gm, '<div class="pl-2">▸ $1</div>')
+        .replace(/\*(.+?)\*/g, '<em class="text-white/80">$1</em>')
+        .replace(/^- (.+)$/gm, '<div class="md-list-item">$1</div>')
+        .replace(/^\d+\. (.+)$/gm, '<div class="md-list-item numbered">$1</div>')
         .replace(/\n/g, '<br>');
     }
 
@@ -1536,7 +2211,8 @@
 
     function addLiveUpdate(session, entry) {
       const container = document.getElementById('liveUpdates');
-      const summary = typeof session.summary === 'string' ? session.summary : 'Update';
+      const rawSummary = typeof session.summary === 'string' ? session.summary : 'Update';
+      const summary = cleanSystemTags(rawSummary);
       let entryType = '', entryColor = 'purple';
 
       if (entry) {
@@ -1549,7 +2225,7 @@
       const html = `
         <div class="session-card p-2 fade-in">
           <div class="flex items-center gap-2 mb-1">
-            <span class="font-pixel text-[7px] neon-${entryColor}">${entryType}://</span>
+            <span class="text-[10px] font-mono font-semibold neon-${entryColor}">${entryType}</span>
             <span class="font-terminal text-[10px] text-${entryColor}-500/50 ml-auto">${formatTime(new Date())}</span>
           </div>
           <div class="font-terminal text-xs text-gray-400 truncate">${escapeHtml(summary.substring(0, 35))}</div>
@@ -1582,6 +2258,7 @@
       autoScroll = !autoScroll;
       const btn = document.getElementById('autoScrollBtn');
       btn.classList.toggle('active', autoScroll);
+      btn.title = autoScroll ? 'Auto scroll (ON)' : 'Auto scroll (OFF)';
     }
 
     function exportSession() {

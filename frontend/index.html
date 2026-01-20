@@ -21,7 +21,7 @@
 
     :root {
       /* Softer neon colors */
-      --neon-cyan: #5ee7df;
+      --neon-cyan: #d87757;
       --neon-magenta: #d066e2;
       --neon-purple: #a78bfa;
       --neon-pink: #f472b6;
@@ -30,7 +30,7 @@
       /* Softer backgrounds */
       --crt-bg: #0f172a;
       --crt-dark: #020617;
-      --grid-color: rgba(94, 231, 223, 0.02);
+      --grid-color: rgba(245, 158, 11, 0.02);
       /* UI colors */
       --surface: rgba(15, 23, 42, 0.6);
       --surface-hover: rgba(30, 41, 59, 0.8);
@@ -129,10 +129,14 @@
       color: var(--neon-green);
     }
 
+    .neon-amber {
+      color: #d87757;
+    }
+
     /* Sidebar Styling */
     .sidebar-panel {
       background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(2, 6, 23, 0.98) 100%);
-      border-right: 1px solid rgba(94, 231, 223, 0.1);
+      border-right: 1px solid rgba(217, 119, 6, 0.15);
       position: relative;
       box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
     }
@@ -146,6 +150,77 @@
       width: 1px;
       background: linear-gradient(180deg, var(--neon-cyan), var(--neon-purple), transparent);
       opacity: 0.3;
+    }
+
+    /* Sidebar Toggle Buttons - Fixed position outside sidebars */
+    .sidebar-toggle {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 48px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(217, 119, 6, 0.3);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 100;
+      transition: all 0.2s;
+    }
+
+    @media (min-width: 768px) {
+      .sidebar-toggle.left { display: flex; }
+    }
+
+    @media (min-width: 1024px) {
+      .sidebar-toggle.right { display: flex; }
+    }
+
+    .sidebar-toggle:hover {
+      background: rgba(217, 119, 6, 0.2);
+      border-color: rgba(217, 119, 6, 0.5);
+    }
+
+    .sidebar-toggle.left {
+      left: 280px;
+      border-radius: 0 6px 6px 0;
+      border-left: none;
+    }
+
+    .sidebar-toggle.left.collapsed-state {
+      left: 0;
+    }
+
+    .sidebar-toggle.right {
+      right: 280px;
+      border-radius: 6px 0 0 6px;
+      border-right: none;
+    }
+
+    .sidebar-toggle.right.collapsed-state {
+      right: 0;
+    }
+
+    .sidebar-toggle svg {
+      width: 14px;
+      height: 14px;
+      color: #F59E0B;
+      transition: transform 0.2s;
+    }
+
+    .sidebar.collapsed {
+      width: 0 !important;
+      min-width: 0 !important;
+      padding: 0 !important;
+      overflow: hidden;
+    }
+
+    .right-panel.collapsed {
+      width: 0 !important;
+      min-width: 0 !important;
+      padding: 0 !important;
+      overflow: hidden;
     }
 
     /* Sidebar Section */
@@ -238,6 +313,7 @@
     }
 
     .session-tooltip-row.cyan i { color: var(--neon-cyan); }
+    .session-tooltip-row.amber i { color: #d87757; }
     .session-tooltip-row.purple i { color: var(--neon-purple); }
     .session-tooltip-row.green i { color: var(--neon-green); }
     .session-tooltip-row.yellow i { color: var(--neon-yellow); }
@@ -274,7 +350,7 @@
     }
 
     .chat-msg.user {
-      background: rgba(94, 231, 223, 0.03);
+      background: rgba(217, 119, 6, 0.03);
     }
 
     .chat-msg.assistant {
@@ -292,7 +368,7 @@
     }
 
     .chat-prompt.user {
-      color: var(--neon-cyan);
+      color: var(--neon-purple);
     }
 
     .chat-prompt.user::before {
@@ -301,11 +377,11 @@
     }
 
     .chat-prompt.assistant {
-      color: var(--neon-purple);
+      color: #d87757;
     }
 
     .chat-prompt.assistant::before {
-      content: '◆';
+      content: '❋';
       opacity: 0.7;
     }
 
@@ -528,8 +604,8 @@
     .code-comment { color: #546e7a; font-style: italic; }  /* gray - comments */
     .code-function { color: #82aaff; } /* blue - function names */
     .code-variable { color: #eeffff; } /* white - variables */
-    .code-operator { color: #89ddff; } /* cyan - operators */
-    .code-punctuation { color: #89ddff; } /* cyan - brackets, etc */
+    .code-operator { color: #d87757; } /* amber - operators */
+    .code-punctuation { color: #d87757; } /* amber - brackets, etc */
     .code-class { color: #ffcb6b; }    /* yellow - class names */
     .code-property { color: #80cbc4; } /* teal - properties */
     .code-tag { color: #f07178; }      /* red - HTML tags */
@@ -540,7 +616,7 @@
     .code-block-wrapper {
       position: relative;
       background: linear-gradient(180deg, #1a1f2e 0%, #0d1117 100%);
-      border: 1px solid rgba(94, 231, 223, 0.15);
+      border: 1px solid rgba(217, 119, 6, 0.15);
       border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -550,7 +626,7 @@
       position: absolute;
       top: 0;
       right: 0;
-      background: linear-gradient(135deg, rgba(94, 231, 223, 0.15), rgba(167, 139, 250, 0.15));
+      background: linear-gradient(135deg, rgba(217, 119, 6, 0.2), rgba(251, 191, 36, 0.15));
       color: rgba(255, 255, 255, 0.5);
       font-size: 9px;
       font-family: 'SF Mono', 'Fira Code', monospace;
@@ -595,13 +671,13 @@
 
     /* Inline Code */
     .inline-code {
-      background: rgba(94, 231, 223, 0.1);
-      color: #5ee7df;
+      background: rgba(217, 119, 6, 0.1);
+      color: #d87757;
       padding: 2px 6px;
       border-radius: 4px;
       font-family: 'SF Mono', 'Fira Code', monospace;
       font-size: 0.85em;
-      border: 1px solid rgba(94, 231, 223, 0.2);
+      border: 1px solid rgba(217, 119, 6, 0.2);
     }
 
     /* Markdown Headings */
@@ -612,7 +688,7 @@
       margin-top: 16px;
       margin-bottom: 8px;
       padding-bottom: 4px;
-      border-bottom: 1px solid rgba(94, 231, 223, 0.2);
+      border-bottom: 1px solid rgba(217, 119, 6, 0.2);
     }
 
     .md-h2 {
@@ -656,35 +732,28 @@
     .collapsible-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
     .collapsible-content.open { max-height: 2000px; }
 
-    /* Cyber Logo */
-    .cyber-logo {
+    /* Claude Logo */
+    .claude-logo {
       width: 36px;
       height: 36px;
       position: relative;
-      background: linear-gradient(135deg, rgba(94, 231, 223, 0.1), rgba(167, 139, 250, 0.1));
-      border: 1px solid rgba(94, 231, 223, 0.3);
-      clip-path: polygon(10% 0%, 100% 0%, 100% 90%, 90% 100%, 0% 100%, 0% 10%);
-    }
-
-    .cyber-logo::before {
-      content: '';
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      right: 2px;
-      bottom: 2px;
-      background: linear-gradient(135deg, var(--crt-dark), var(--crt-bg));
-      clip-path: polygon(10% 0%, 100% 0%, 100% 90%, 90% 100%, 0% 100%, 0% 10%);
-    }
-
-    .cyber-logo-inner {
-      position: absolute;
-      inset: 0;
+      background: linear-gradient(135deg, rgba(217, 119, 6, 0.2), rgba(251, 191, 36, 0.1));
+      border: 1px solid rgba(217, 119, 6, 0.4);
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1;
     }
+
+    .claude-logo svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Claude brand colors */
+    .text-claude { color: #D97706; }
+    .text-claude-light { color: #d87757; }
+    .neon-claude { color: #D97706; text-shadow: 0 0 10px rgba(217, 119, 6, 0.5); }
 
     /* Live indicator - Subtle */
     .live-dot {
@@ -1027,6 +1096,14 @@
   <!-- Sidebar Overlay -->
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
+  <!-- Fixed toggle buttons for sidebars -->
+  <button class="sidebar-toggle left" onclick="toggleLeftSidebar()" id="leftToggle" title="Toggle sidebar">
+    <i data-lucide="chevron-left" id="leftToggleIcon"></i>
+  </button>
+  <button class="sidebar-toggle right" onclick="toggleRightSidebar()" id="rightToggle" title="Toggle panel">
+    <i data-lucide="chevron-right" id="rightToggleIcon"></i>
+  </button>
+
   <div id="app" class="crt-screen grid-bg flex h-screen">
 
     <!-- Sidebar -->
@@ -1036,16 +1113,14 @@
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
-      <!-- Header with Logo -->
-      <div class="sidebar-section" style="border-bottom: 1px solid rgba(94, 231, 223, 0.15);">
+      <!-- Header with Claude Logo -->
+      <div class="sidebar-section" style="border-bottom: 1px solid rgba(217, 119, 6, 0.2);">
         <div class="flex items-center gap-3">
-          <div class="cyber-logo">
-            <div class="cyber-logo-inner">
-              <i data-lucide="cpu" class="w-4 h-4 text-cyan-400"></i>
-            </div>
+          <div class="claude-logo">
+            <img src="assets/claude.png" alt="Claude" style="width: 22px; height: 22px; object-fit: contain;">
           </div>
           <div class="flex-1 min-w-0">
-            <div class="text-sm font-bold text-white tracking-wide">Claude Dashboard</div>
+            <div class="text-sm font-bold tracking-wide">Claude Dashboard</div>
             <div class="flex items-center gap-1.5 mt-0.5">
               <div class="live-dot" id="connectionDot"></div>
               <span class="text-[10px] text-white/40" id="connectionStatus">Connecting</span>
@@ -1057,7 +1132,7 @@
       <!-- Stats Bar -->
       <div class="sidebar-section py-2 flex items-center justify-around text-center">
         <div>
-          <div class="text-lg font-bold text-cyan-400" id="statSessions">0</div>
+          <div class="text-lg font-bold text-amber-400" id="statSessions">0</div>
           <div class="text-[10px] text-white/30 uppercase">Sessions</div>
         </div>
         <div class="w-px h-8 bg-white/10"></div>
@@ -1095,7 +1170,7 @@
       <!-- Session List Header -->
       <div class="px-3 py-2 flex items-center justify-between">
         <span class="sidebar-section-title mb-0">Sessions</span>
-        <span class="text-xs text-cyan-400" id="sessionCount">0</span>
+        <span class="text-xs text-amber-400" id="sessionCount">0</span>
       </div>
 
       <!-- Session List -->
@@ -1106,7 +1181,7 @@
       </div>
 
       <!-- Footer -->
-      <div class="sidebar-section border-t border-cyan-500/10" style="border-bottom: none;">
+      <div class="sidebar-section border-t border-amber-500/10" style="border-bottom: none;">
         <button onclick="refreshSessions()" class="retro-btn w-full text-xs py-2.5">
           <span class="flex items-center justify-center gap-2">
             <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
@@ -1165,7 +1240,7 @@
 
       <!-- Stats Bar -->
       <div class="border-t border-white/5 px-3 py-2 flex items-center gap-4 bg-black/20 text-xs text-white/50">
-        <span><span class="text-cyan-400" id="msgCount">0</span> messages</span>
+        <span><span class="text-amber-400" id="msgCount">0</span> messages</span>
         <span><span class="text-purple-400" id="tokenCount">0</span> tokens</span>
         <span><span class="text-green-400" id="toolCount">0</span> tools</span>
         <span class="ml-auto text-white/30" id="modelName">—</span>
@@ -1291,6 +1366,38 @@
       document.body.style.overflow = '';
     }
 
+    // Toggle left sidebar (desktop)
+    function toggleLeftSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const toggle = document.getElementById('leftToggle');
+      const icon = document.getElementById('leftToggleIcon');
+      sidebar.classList.toggle('collapsed');
+      toggle.classList.toggle('collapsed-state');
+
+      if (sidebar.classList.contains('collapsed')) {
+        icon.setAttribute('data-lucide', 'chevron-right');
+      } else {
+        icon.setAttribute('data-lucide', 'chevron-left');
+      }
+      lucide.createIcons();
+    }
+
+    // Toggle right sidebar (desktop)
+    function toggleRightSidebar() {
+      const panel = document.getElementById('rightPanel');
+      const toggle = document.getElementById('rightToggle');
+      const icon = document.getElementById('rightToggleIcon');
+      panel.classList.toggle('collapsed');
+      toggle.classList.toggle('collapsed-state');
+
+      if (panel.classList.contains('collapsed')) {
+        icon.setAttribute('data-lucide', 'chevron-left');
+      } else {
+        icon.setAttribute('data-lucide', 'chevron-right');
+      }
+      lucide.createIcons();
+    }
+
     // Close panels on overlay click
     document.getElementById('sidebarOverlay').addEventListener('click', function() {
       closeSidebar();
@@ -1334,6 +1441,11 @@
           hasMoreSessions = data.hasMore || false;
           renderSessions();
           updateStats();
+          // Auto-load the most recent session
+          if (sessions.length > 0 && !currentSession) {
+            const latestSession = sessions[0];
+            loadSession(latestSession.projectRaw, latestSession.id);
+          }
           break;
         case 'moreSessions':
           // Append new sessions
@@ -1442,7 +1554,7 @@
         return `
           <div class="session-card cursor-pointer ${isActive ? 'active' : ''}" onclick="loadSession('${session.projectRaw}', '${session.id}')">
             <div class="flex items-center gap-2 mb-1">
-              <span class="text-xs text-cyan-400/80 font-medium truncate">${escapeHtml(projectName)}</span>
+              <span class="text-xs text-amber-400/80 font-medium truncate">${escapeHtml(projectName)}</span>
               ${modelShort ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400">${modelShort}</span>` : ''}
               ${isCompleted ? '<i data-lucide="check-circle" class="w-3 h-3 text-green-400 ml-auto flex-shrink-0"></i>' : '<i data-lucide="circle-dot" class="w-3 h-3 text-yellow-400 ml-auto flex-shrink-0 animate-pulse"></i>'}
             </div>
@@ -1475,7 +1587,7 @@
       if (!isFiltered && hasMoreSessions) {
         const remaining = totalSessions - sessions.length;
         html += `
-          <button onclick="loadMoreSessions()" class="load-more-btn w-full py-2.5 mt-2 text-xs text-cyan-400 hover:text-cyan-300 hover:bg-white/5 rounded-lg border border-white/10 hover:border-cyan-400/30 transition-all flex items-center justify-center gap-2">
+          <button onclick="loadMoreSessions()" class="load-more-btn w-full py-2.5 mt-2 text-xs text-amber-400 hover:text-amber-300 hover:bg-white/5 rounded-lg border border-white/10 hover:border-amber-400/30 transition-all flex items-center justify-center gap-2">
             <i data-lucide="chevrons-down" class="w-4 h-4"></i>
             <span>โหลดเพิ่ม (${remaining} รายการ)</span>
           </button>
@@ -1763,9 +1875,9 @@
           html: `
             <div class="msg-system fade-in px-3 py-2 opacity-60">
               <div class="flex items-center gap-2">
-                <i data-lucide="terminal" class="w-3 h-3 text-cyan-400"></i>
-                <span class="text-cyan-400 text-xs font-mono">Command</span>
-                <span class="text-cyan-300/70 text-xs font-mono">${escapeHtml(cmd)}</span>
+                <i data-lucide="terminal" class="w-3 h-3 text-amber-400"></i>
+                <span class="text-amber-400 text-xs font-mono">Command</span>
+                <span class="text-amber-300/70 text-xs font-mono">${escapeHtml(cmd)}</span>
               </div>
             </div>
           `
@@ -1912,7 +2024,7 @@
       const name = toolName.toLowerCase();
       // แต่ละ tool มีสีต่างกัน
       if (name.includes('bash') || name.includes('shell')) return 'text-green-400';
-      if (name.includes('read') || name.includes('cat')) return 'text-cyan-400';
+      if (name.includes('read') || name.includes('cat')) return 'text-amber-400';
       if (name.includes('write') || name.includes('edit')) return 'text-amber-400';
       if (name.includes('glob') || name.includes('find')) return 'text-purple-400';
       if (name.includes('grep') || name.includes('search')) return 'text-pink-400';
@@ -1964,7 +2076,7 @@
           <div class="flex-shrink-0 w-6 h-6 flex items-center justify-center ${color} opacity-70">
             <i data-lucide="${icon}" class="w-4 h-4"></i>
           </div>
-          <div class="flex-1 px-3 py-2 min-w-0">
+          <div class="flex-1 py-1.5 min-w-0">
             <div class="flex items-center gap-2 cursor-pointer" onclick="toggleJson('${id}')">
               <span class="${color} text-xs font-mono font-semibold">${escapeHtml(toolName)}</span>
               <span class="${color}/40 text-xs font-mono flex-1 truncate">${escapeHtml(preview)}</span>
@@ -1994,10 +2106,10 @@
       return `
         <div class="msg-result px-3 py-2 fade-in">
           <div class="flex items-center gap-2 cursor-pointer" onclick="toggleJson('${id}')">
-            <span class="text-cyan-400 opacity-60">←</span>
-            <span class="text-cyan-400/50 text-xs font-mono flex-1 truncate">${escapeHtml(preview)}${isLarge ? '...' : ''}</span>
-            ${isJson ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400">JSON</span>' : ''}
-            ${isLarge ? `<i data-lucide="chevron-down" class="w-3 h-3 text-cyan-400/40" id="${id}-icon"></i>` : ''}
+            <span class="text-amber-400 opacity-60">←</span>
+            <span class="text-amber-400/50 text-xs font-mono flex-1 truncate">${escapeHtml(preview)}${isLarge ? '...' : ''}</span>
+            ${isJson ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">JSON</span>' : ''}
+            ${isLarge ? `<i data-lucide="chevron-down" class="w-3 h-3 text-amber-400/40" id="${id}-icon"></i>` : ''}
           </div>
           ${isLarge ? `<div id="${id}" class="collapsible-content"><div class="mt-2 p-2 bg-black/20 rounded text-xs font-mono max-h-48 overflow-auto ${isJson ? '' : 'whitespace-pre-wrap'}">${jsonContent}</div></div>` : ''}
         </div>
@@ -2016,19 +2128,19 @@
       const isLarge = fullContent.length > 150;
 
       return `
-        <div class="msg-result px-3 py-2 fade-in border-l-2 border-l-purple-400">
+        <div class="msg-result px-3 py-2 fade-in border-l-2 border-l-amber-400">
           <div class="flex items-center gap-2 cursor-pointer" onclick="toggleJson('${id}')">
-            <span class="text-purple-400 opacity-60">⬡</span>
-            <span class="text-purple-400 text-xs font-mono">agent</span>
-            <span class="text-purple-400/40 text-[10px] font-mono">#${escapeHtml(agentId.substring(0, 8))}</span>
-            ${duration ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-400">${duration}</span>` : ''}
+            <span class="text-amber-400 opacity-60">⬡</span>
+            <span class="text-amber-400 text-xs font-mono">agent</span>
+            <span class="text-amber-400/40 text-[10px] font-mono">#${escapeHtml(agentId.substring(0, 8))}</span>
+            ${duration ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">${duration}</span>` : ''}
             ${tokens ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-400">${tokens}</span>` : ''}
             ${toolCount ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-green-500/20 text-green-400">${toolCount}⚙</span>` : ''}
             <span class="flex-1"></span>
-            ${isLarge ? `<i data-lucide="chevron-down" class="w-3 h-3 text-purple-400/40" id="${id}-icon"></i>` : ''}
+            ${isLarge ? `<i data-lucide="chevron-down" class="w-3 h-3 text-amber-400/40" id="${id}-icon"></i>` : ''}
           </div>
           <div class="mt-2 text-xs">
-            ${isLarge ? `<div class="text-purple-400/50 truncate cursor-pointer" onclick="toggleJson('${id}')">${escapeHtml(preview)}...</div><div id="${id}" class="collapsible-content"><div class="mt-2 p-2 bg-black/20 rounded text-purple-100/80 whitespace-pre-wrap break-words max-h-48 overflow-auto">${renderMarkdownLite(fullContent)}</div></div>` : `<div class="text-purple-100/80 whitespace-pre-wrap break-words">${renderMarkdownLite(fullContent)}</div>`}
+            ${isLarge ? `<div class="text-amber-400/50 truncate cursor-pointer" onclick="toggleJson('${id}')">${escapeHtml(preview)}...</div><div id="${id}" class="collapsible-content"><div class="mt-2 p-2 bg-black/20 rounded text-amber-100/80 whitespace-pre-wrap break-words max-h-48 overflow-auto">${renderMarkdownLite(fullContent)}</div></div>` : `<div class="text-amber-100/80 whitespace-pre-wrap break-words">${renderMarkdownLite(fullContent)}</div>`}
           </div>
         </div>
       `;
@@ -2216,8 +2328,8 @@
       let entryType = '', entryColor = 'purple';
 
       if (entry) {
-        if (entry.type === 'user') { entryType = 'USER'; entryColor = 'cyan'; }
-        else if (entry.type === 'assistant') { entryType = 'CLAUDE'; entryColor = 'purple'; }
+        if (entry.type === 'user') { entryType = 'USER'; entryColor = 'purple'; }
+        else if (entry.type === 'assistant') { entryType = 'CLAUDE'; entryColor = 'amber'; }
         else if (entry.type === 'tool_use') { entryType = entry.name || 'TOOL'; entryColor = 'green'; }
         else { entryType = entry.type.toUpperCase(); }
       }
